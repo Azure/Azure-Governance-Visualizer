@@ -1,0 +1,102 @@
+---
+name: Check & Pull Latest Upstream GitHub Release
+
+on:
+  schedule:
+    - cron: "0 0 * * 1-5"
+  workflow_dispatch: {}
+
+env:
+  remote_repository: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
+  branch_name: "pull-latest-upstream-release"
+  pr_title: "New Upstream GitHub Release Available"
+  pr_body: "This is an automated 'pull_request' containing the latest release from the upstream repo.\nPlease review the 'files changed' tab to review changes."
+
+jobs:
+  get-latest-release:
+    name: Check & Pull Latest Upstream GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Local repository checkout
+        uses: actions/checkout@v3
+        with:
+          path: ${{ github.repository }}
+          fetch-depth: 0
+
+      - name: Configure local git
+        run: |
+          git config user.name github-actions
+          git config user.email action@github.com
+        working-directory: ${{ github.repository }}
+
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Create and checkout branch
+        run: |
+          BRANCH_URL="repos/${{ github.repository }}/branches"
+          JQ_FILTER=".[] | select(.name == \"${{ env.branch_name }}\").name"
+          CHECK_BRANCH_ORIGIN=$(gh api $BRANCH_URL | jq -r "$JQ_FILTER")
+          if [ -z "$CHECK_BRANCH_ORIGIN" ]
+          then
+            echo "Checkout local branch (create new, no origin)..."
+            git checkout -b ${{ env.branch_name }}
+          else
+            echo "Checkout local branch (create new, track from origin)..."
+            git checkout -b ${{ env.branch_name }} --track origin/${{ env.branch_name }}
+          fi
+        working-directory: ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+
+      - name: Check for upstream release and pull if available
+        shell: pwsh
+        run: |
+          $keepThese = @(".github/workflows/AzGovViz.yml", ".github/workflows/AzGovViz_OIDC.yml", ".azuredevops", ".devcontainer", ".vscode", "img", "pwsh", "slides", ".gitignore", "README.md", "contributionGuide.md", "history.md", "setup.md", "version.txt")
+          .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $keepThese -syncAllReleases:$false -directoryForReleases "."
+        working-directory: ${{ github.repository }}
+
+      - name: Check for changes
+        id: git_status
+        run: |
+          CHECK_GIT_STATUS=($(git status -s))
+          git status -s
+          echo "changes=${#CHECK_GIT_STATUS[@]}" >> $GITHUB_OUTPUT
+        working-directory: ${{ github.repository }}
+
+      - name: Add files, commit and push
+        if: steps.git_status.outputs.changes > 0
+        run: |
+          echo "Pushing changes to origin..."
+          git add releases
+          git add releases/*
+          git config --global core.autocrlf input
+          git commit -m '${{ env.pr_title }}'
+          git push origin ${{ env.branch_name }}
+        working-directory: ${{ github.repository }}
+
+      - name: Create pull request
+        if: steps.git_status.outputs.changes > 0
+        run: |
+          HEAD_LABEL="${{ github.repository_owner }}:${{ env.branch_name }}"
+          BASE_LABEL="${{ github.repository_owner }}:$(echo '${{ github.ref }}' | sed 's:refs/heads/::')"
+          PULL_REQUEST_URL="repos/${{ github.repository }}/pulls"
+          JQ_FILTER=".[] | select(.head.label == \"$HEAD_LABEL\") | select(.base.label == \"$BASE_LABEL\") | .url"
+          CHECK_PULL_REQUEST_URL=$(gh api $PULL_REQUEST_URL | jq -r "$JQ_FILTER")
+          if [ -z "$CHECK_PULL_REQUEST_URL" ]
+          then
+            CHECK_PULL_REQUEST_URL=$(gh pr create \
+            --title "${{ env.pr_title }}" \
+            --body "${{ env.pr_body }}" \
+            --base "${{ github.ref }}" \
+            --head "${{ env.branch_name }}")
+            echo "Created new PR: $CHECK_PULL_REQUEST_URL"
+          else
+            echo "Existing PR found: $CHECK_PULL_REQUEST_URL"
+          fi
+        working-directory: ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
