@@ -72,8 +72,8 @@ jobs:
         if: steps.git_status.outputs.changes > 0
         run: |
           echo "Pushing changes to origin..."
-          git add releases
-          git add releases/*
+          git add .
+          git add ./*
           git config --global core.autocrlf input
           git commit -m '${{ env.pr_title }}'
           git push origin ${{ env.branch_name }}
