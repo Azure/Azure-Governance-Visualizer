@@ -66,6 +66,7 @@ jobs:
           find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
           replace: "Azure/Azure-Governance-Visualizer"
           regex: false
+          exclude: '.github/workflows/upstream-release-checker.yml'
 
       - name: Check for changes
         id: git_status
