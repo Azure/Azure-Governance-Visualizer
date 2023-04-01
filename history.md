@@ -17,7 +17,7 @@ __Changes__ (2023-Mar-30 / 6.1.0 Major)
 
 __Changes__ (2023-Mar-25 / Major)
 
-* Fix issue #[176](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/176) / occured when secureScores API returns multiple values
+* Fix issue #[176](https://github.com/Azure/Azure-Governance-Visualizer/issues/176) / occured when secureScores API returns multiple values
 
 __Changes__ (2023-Mar-23 / Major)
 
@@ -28,7 +28,7 @@ __Changes__ (2023-Mar-20 / Major)
 
 * Fix/update feature Policy Remediation
   * Optimze the Azure Resource Graph query by adding sort, due to duplicates/missing entries for results > 1k
-* __Analysis__ on issue #[175](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/175) (no real explanation, but fixed by using `IsNullOrWhiteSpace` instead of `IsNullOrEmpty`)
+* __Analysis__ on issue #[175](https://github.com/Azure/Azure-Governance-Visualizer/issues/175) (no real explanation, but fixed by using `IsNullOrWhiteSpace` instead of `IsNullOrEmpty`)
 
 ``` powershell
 $htdetails0 = @"
@@ -79,7 +79,7 @@ else {
 
 __Changes__ (2023-Mar-17 / Major)
 
-* Fix issue #[175](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/175) / occured with new policy definition [Configure diagnostics for container group to log analytics workspace (21c469fa-a887-4363-88a9-60bfd6911a15)](https://www.azadvertizer.net/azpolicyadvertizer/21c469fa-a887-4363-88a9-60bfd6911a15.html). Cache built-in Policy definitions failed.
+* Fix issue #[175](https://github.com/Azure/Azure-Governance-Visualizer/issues/175) / occured with new policy definition [Configure diagnostics for container group to log analytics workspace (21c469fa-a887-4363-88a9-60bfd6911a15)](https://www.azadvertizer.net/azpolicyadvertizer/21c469fa-a887-4363-88a9-60bfd6911a15.html). Cache built-in Policy definitions failed.
 
 __Changes__ (2023-Mar-15 / Major)
 
@@ -93,7 +93,7 @@ __Changes__ (2023-Mar-08 / Major)
 * Extended the 'Cost optimization & cleanup' feature (HTML __TenantSummary__/Subscriptions, Resources & Defender) with application gateways with empty backend pools' - thanks @sebassem
 * New feature Policy Remediation (HTML __TenantSummary__/Policy, CSV export)
   * Fix: it is indeed possible that no Policy definitions require remediation
-* Update `/.azuredevops/pipelines/AzGovViz.pipeline.yml` and `/.azuredevops/pipelines/AzGovViz.variables.yml`. Added guidance (issue [#173](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/173)): if using the publish to webApp feature the ManagementGroupId variable must have correct casing (Linux!=linuX)
+* Update `/.azuredevops/pipelines/AzGovViz.pipeline.yml` and `/.azuredevops/pipelines/AzGovViz.variables.yml`. Added guidance (issue [#173](https://github.com/Azure/Azure-Governance-Visualizer/issues/173)): if using the publish to webApp feature the ManagementGroupId variable must have correct casing (Linux!=linuX)
 * Minor optimizations
 
 __Changes__ (2023-Mar-06 / Major)
@@ -158,7 +158,7 @@ __Changes__ (2023-Jan-24 / Major)
 
 __Changes__ (2023-Jan-19 / Major)
 
-* Cover Preview [Azure Storage Account with Azure DNS zone endpoints](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview#azure-dns-zone-endpoints-preview) ([Issue #164](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/164))
+* Cover Preview [Azure Storage Account with Azure DNS zone endpoints](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-overview#azure-dns-zone-endpoints-preview) ([Issue #164](https://github.com/Azure/Azure-Governance-Visualizer/issues/164))
 * Add feature to simulate Management Group Hierarchy Map
  * New parameter `-HierarchyMapOnlyCustomData` (documentation update pending)
 * Private Endpoint feature - add Microsoft tenants (cross tenant PE) (`-MSTenantIds`)
@@ -166,7 +166,7 @@ __Changes__ (2023-Jan-19 / Major)
 
 __Changes__ (2023-Jan-06 / Major)
 
-* Fix issue PIM eligibility (do not process out-of-scope subscriptions) [issue #161](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/161)
+* Fix issue PIM eligibility (do not process out-of-scope subscriptions) [issue #161](https://github.com/Azure/Azure-Governance-Visualizer/issues/161)
 * Collect Advisor Scores foreach subscription
 * Update DailySummary
   * Add count of subscriptions per quotaId
@@ -200,7 +200,7 @@ __Changes__ (2022-Dec-22 / Major)
 * Add reference for Microsoft Defender for Cloud security alerts on AzGovViz activity - [Security](#security)
 * Fix for migrated Subscriptions. In rare cases a subscription that was migrated to another tenant may still be returned from the [Entities ARM API](https://learn.microsoft.com/en-us/rest/api/managementgroups/entities/list), but not from the [Subscriptions ARM API](https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list) - if that is the case then these subscriptions will be added to the out-of-scope subscriptions collection
 * Use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.1.62
-  * Fix issue [155](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/155) AzureChinaCloud
+  * Fix issue [155](https://github.com/Azure/Azure-Governance-Visualizer/issues/155) AzureChinaCloud
 * Minor optimizations 
   * Using parameter `-ManagementGroupsOnly`
   * Using parameter `-HierarchyMapOnly`
@@ -208,7 +208,7 @@ __Changes__ (2022-Dec-22 / Major)
 
 __Changes__ (2022-Dec-13 / Major)
 
-* Fix for sovereign clouds - replace hardcoded ARM endpoint uri with dynamic ([issue #155](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/155))
+* Fix for sovereign clouds - replace hardcoded ARM endpoint uri with dynamic ([issue #155](https://github.com/Azure/Azure-Governance-Visualizer/issues/155))
 * Update Azure Devops Pipeline YAML
   * Add `microsoft.chaos/chaosexperiments`to `-ExcludedResourceTypesDiagnosticsCapableParameters` parameter defaults
 
@@ -488,7 +488,7 @@ __Changes__ (2022-May-21 / Major)
 * Optional feature: publish HTML to Azure Web App (check the __[Setup Guide](setup.md)__) in Azure DevOps or GitHub Actions - thanks Wayne Meyer
 * New feature / report on [enabled Subscription Features](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/preview-features) TenantSummary, ScopeInsights and CSV export
 * Decomissioned Azure DevOps `.pipelines` - use the new YAML files `.azuredevops/pipelines/*` 
-* Fix [#issue92](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/issues/92) -> pipeline .azuredevops/pipelines/AzGovViz.pipeline.yml
+* Fix [#issue92](https://github.com/Azure/Azure-Governance-Visualizer/issues/92) -> pipeline .azuredevops/pipelines/AzGovViz.pipeline.yml
 * Update Azure DevOps pipelines / use AzurePowershell@5
 * Update prerequisites.ps1
 
@@ -563,7 +563,7 @@ __Changes__ (2021-Dec-10 / Minor)
 
 __Changes__ (2021-Dec-09 / Minor)
 
-* [Run AzGovViz in GitHub CodeSpaces](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/setup.md#azgovviz-github-codespaces) - __thanks!__ Carlos Mendible (Microsoft Cloud Solution Architect - Spain)
+* [Run AzGovViz in GitHub CodeSpaces](https://github.com/Azure/Azure-Governance-Visualizer/blob/master/setup.md#azgovviz-github-codespaces) - __thanks!__ Carlos Mendible (Microsoft Cloud Solution Architect - Spain)
 * JSON output update -> filenames will indicate if Role assignment is PIM (Priviliged Identity Management) based
 
 __Changes__ (2021-Nov-23 / Major)

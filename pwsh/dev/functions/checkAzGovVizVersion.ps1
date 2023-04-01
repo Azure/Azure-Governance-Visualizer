@@ -1,6 +1,6 @@
 function checkAzGovVizVersion {
     try {
-        $getRepoVersion = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/master/version.json'
+        $getRepoVersion = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Azure/Azure-Governance-Visualizer/master/version.json'
         $repoVersion = ($getRepoVersion.Content | ConvertFrom-Json).ProductVersion
 
         $script:azGovVizNewerVersionAvailable = $false
@@ -31,7 +31,7 @@ function checkAzGovVizVersion {
             $versionDriftSummary = "$repoVersion ($versionDrift)"
             $script:azGovVizVersionOnRepositoryFull = $versionDriftSummary
             $script:azGovVizNewerVersionAvailable = $true
-            $script:azGovVizNewerVersionAvailableHTML = '<span style="color:#FF5733; font-weight:bold">Get the latest Azure Governance Visualizer version ' + $azGovVizVersionOnRepositoryFull + '!</span> <a href="https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>'
+            $script:azGovVizNewerVersionAvailableHTML = '<span style="color:#FF5733; font-weight:bold">Get the latest Azure Governance Visualizer version ' + $azGovVizVersionOnRepositoryFull + '!</span> <a href="https://github.com/Azure/Azure-Governance-Visualizer/blob/master/history.md" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>'
         }
         else {
             Write-Host "Azure Governance Visualizer version is up to date '$ProductVersion'" -ForegroundColor Green
