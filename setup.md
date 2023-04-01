@@ -153,7 +153,7 @@ Proceed with step [__Clone the Azure Governance Visualizer repository__](#clone-
 
 ```powershell
 Set-Location "c:\Git"
-git clone "https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git"
+git clone "https://github.com/Azure/Azure-Governance-Visualizer.git"
 ```
 
 Proceed with step [__Run Azure Governance Visualizer from Console__](#run-azure-governance-visualizer-from-console)
@@ -196,7 +196,7 @@ Password for user \<Id\>: Enter App registration´s secret
 
 ### Run Azure Governance Visualizer
 
-Familiarize yourself with the available [parameters](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting#usage) for Azure Governance Visualizer
+Familiarize yourself with the available [parameters](https://github.com/Azure/Azure-Governance-Visualizer#usage) for Azure Governance Visualizer
 
 * PowerShell
 
@@ -220,7 +220,7 @@ c:\Git\Azure-MG-Sub-Governance-Reporting\pwsh\AzGovVizParallel.ps1 -ManagementGr
 
 ## Import Azure Governance Visualizer GitHub repository
 
-Azure Governance Visualizer Clone URL: `https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git`
+Azure Governance Visualizer Clone URL: `https://github.com/Azure/Azure-Governance-Visualizer.git`
 
 [Import into a new repo](https://docs.microsoft.com/en-us/azure/devops/repos/git/import-git-repository?view=azure-devops#import-into-a-new-repo)
 
@@ -421,7 +421,7 @@ Create a 'private' repository
 
 Click on 'Import code'
 
-Use 'https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git' as clone URL
+Use 'https://github.com/Azure/Azure-Governance-Visualizer.git' as clone URL
 
 Click on 'Begin import'
 
