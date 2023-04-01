@@ -388,7 +388,7 @@ This permission is <b>mandatory</b> in each and every scenario!
     <tr>
       <td><b>B</b><br>Console | Guest user account</td>
       <td>If the tenant is hardened (AAD External Identities / Guest user access = most restrictive) then Guest User must be assigned the AAD Role 'Directory readers'<br>
-      &#x1F4A1; <a href="https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/active-directory/fundamentals/users-default-permissions.md#compare-member-and-guest-default-permissions" target="_blank">Compare member and guest default permissions</a><br>
+      &#x1F4A1; <a href="https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/active-directory/fundamentals/users-default-permissions.md#compare-member-and-guest-default-permissions" target="_blank">Compare member and guest default permissions</a><br>
       &#x1F4A1; <a href="https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/users-restrict-guest-permissions" target="_blank">Restrict Guest permissions</a>
       </td>
     </tr>
@@ -617,7 +617,7 @@ You can integrate Azure Governance Visualizer (same project as AzOps).
       trigger:
         branches:
           include:
-            - master
+            - main
 ```
 
 ## Integrate PSRule for Azure

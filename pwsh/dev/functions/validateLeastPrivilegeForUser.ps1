@@ -22,7 +22,7 @@ function validateLeastPrivilegeForUser {
             }
         }
         Write-Host "The required Azure RBAC role at Management Group scope '$ManagementGroupId' is 'Reader' (acdd72a7-3385-48ef-bd42-f606fba81ae7)."
-        Write-Host "Recommendation: consider executing the script in context of a Service Principal with least privilege. Review the Azure Governance Visualizer Setup Guide at 'https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/setup.md'"
+        Write-Host "Recommendation: consider executing the script in context of a Service Principal with least privilege. Review the Azure Governance Visualizer Setup Guide at 'https://github.com/Azure/Azure-Governance-Visualizer/blob/main/setup.md'"
         Write-Host ' * * * * * * * * * * * * * * * * * * * * * *' -ForegroundColor DarkRed
         pause
     }

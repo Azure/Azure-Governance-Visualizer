@@ -32,7 +32,7 @@ if ($versiontxt.Count -ne 1 -or $versiontxtSplitted.count -ne 3 -or $versiontxtS
 
 if (-not $skipVersionCompare) {
     try {
-        $repoVersionJsonUri = 'https://raw.githubusercontent.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/master/version.json'
+        $repoVersionJsonUri = 'https://raw.githubusercontent.com/Azure/Azure-Governance-Visualizer/main/version.json'
         $getRepoVersion = Invoke-WebRequest -Uri $repoVersionJsonUri
         $repoVersion = ($getRepoVersion.Content | ConvertFrom-Json).ProductVersion
     }

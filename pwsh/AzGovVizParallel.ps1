@@ -347,8 +347,8 @@
     AUTHOR: Julian Hayward - Customer Engineer - Customer Success Unit | Azure Infrastucture/Automation/Devops/Governance | Microsoft
 
 .LINK
-    https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting (aka.ms/AzGovViz)
-    https://github.com/microsoft/CloudAdoptionFramework/tree/master/govern/AzureGovernanceVisualizer
+    https://github.com/Azure/Azure-Governance-Visualizer (aka.ms/AzGovViz)
+    https://github.com/microsoft/CloudAdoptionFramework/tree/main/govern/AzureGovernanceVisualizer
     Please note that while being developed by a Microsoft employee, Azure Governance Visualizer is not a Microsoft service or product. Azure Governance Visualizer is a personal/community driven project, there are none implicit or explicit obligations related to this project, it is provided 'as is' with no warranties and confer no rights.
 #>
 
@@ -2128,7 +2128,7 @@ function cacheBuiltIn {
 }
 function checkAzGovVizVersion {
     try {
-        $getRepoVersion = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/master/version.json'
+        $getRepoVersion = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Azure/Azure-Governance-Visualizer/main/version.json'
         $repoVersion = ($getRepoVersion.Content | ConvertFrom-Json).ProductVersion
 
         $script:azGovVizNewerVersionAvailable = $false
@@ -2159,7 +2159,7 @@ function checkAzGovVizVersion {
             $versionDriftSummary = "$repoVersion ($versionDrift)"
             $script:azGovVizVersionOnRepositoryFull = $versionDriftSummary
             $script:azGovVizNewerVersionAvailable = $true
-            $script:azGovVizNewerVersionAvailableHTML = '<span style="color:#FF5733; font-weight:bold">Get the latest Azure Governance Visualizer version ' + $azGovVizVersionOnRepositoryFull + '!</span> <a href="https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>'
+            $script:azGovVizNewerVersionAvailableHTML = '<span style="color:#FF5733; font-weight:bold">Get the latest Azure Governance Visualizer version ' + $azGovVizVersionOnRepositoryFull + '!</span> <a href="https://github.com/Azure/Azure-Governance-Visualizer/blob/main/history.md" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>'
         }
         else {
             Write-Host "Azure Governance Visualizer version is up to date '$ProductVersion'" -ForegroundColor Green
@@ -4051,7 +4051,7 @@ function getResourceDiagnosticsCapability {
                 if ($skipThisResourceType -eq $false) {
                     $resourceCount = $resourceTypesUniqueGroup.Count
 
-                    #thx @Jim Britt (Microsoft) https://github.com/JimGBritt/AzurePolicy/tree/master/AzureMonitor/Scripts Create-AzDiagPolicy.ps1
+                    #thx @Jim Britt (Microsoft) https://github.com/JimGBritt/AzurePolicy/tree/main/AzureMonitor/Scripts Create-AzDiagPolicy.ps1
                     $responseJSON = ''
                     $logCategories = @()
                     $metrics = $false
@@ -16790,7 +16790,7 @@ extensions: [{ name: 'sort' }]
                 <i class="fa fa-exclamation-triangle orange" aria-hidden="true"></i><span style="color:#ff0000"> Output of $tfCount lines would exceed the html rows limit of $HtmlTableRowsLimit (html file potentially would become unresponsive). Work with the CSV file <i>$($csvFilename).csv</i> | Note: the CSV file will only exist if you did NOT use parameter <i>-NoCsvExport</i></span><br>
                 <span style="color:#ff0000">You can adjust the html row limit by using parameter <i>-HtmlTableRowsLimit</i></span><br>
                 <span style="color:#ff0000">You can reduce the number of lines by using parameter <i>-LargeTenant</i> and/or <i>-DoNotIncludeResourceGroupsAndResourcesOnRBAC</i></span><br>
-                <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/Azure/Azure-Governance-Visualizer#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
             </div>
 "@)
         }
@@ -17899,7 +17899,7 @@ extensions: [{ name: 'sort' }]
                 <i class="fa fa-exclamation-triangle orange" aria-hidden="true"></i><span style="color:#ff0000"> Output of $tfCount lines would exceed the html rows limit of $HtmlTableRowsLimit (html file potentially would become unresponsive). Work with the CSV file <i>$($csvFilename).csv</i> | Note: the CSV file will only exist if you did NOT use parameter <i>-NoCsvExport</i></span><br>
                 <span style="color:#ff0000">You can adjust the html row limit by using parameter <i>-HtmlTableRowsLimit</i></span><br>
                 <span style="color:#ff0000">You can reduce the number of lines by using parameter <i>-LargeTenant</i> and/or <i>-DoNotIncludeResourceGroupsAndResourcesOnRBAC</i></span><br>
-                <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/Azure/Azure-Governance-Visualizer#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
             </div>
 "@)
         }
@@ -20973,7 +20973,7 @@ extensions: [{ name: 'sort' }]
                 <div class="content TenantSummary padlxx">
                     <i class="fa fa-exclamation-triangle orange" aria-hidden="true"></i><span style="color:#ff0000"> Output of $tfCount lines would exceed the html rows limit of $HtmlTableRowsLimit (html file potentially would become unresponsive). Work with the CSV file <i>$($csvFilename).csv</i> | Note: the CSV file will only exist if you did NOT use parameter <i>-NoCsvExport</i></span><br>
                     <span style="color:#ff0000">You can adjust the html row limit by using parameter <i>-HtmlTableRowsLimit</i></span><br>
-                    <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
+                    <span style="color:#ff0000">Check the parameters documentation</span> <a class="externallink" href="https://github.com/Azure/Azure-Governance-Visualizer#parameters" target="_blank" rel="noopener">Azure Governance Visualizer docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
                 </div>
 "@)
                 }
@@ -23510,7 +23510,7 @@ extensions: [{ name: 'sort' }]
             [void]$htmlTenantSummary.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_ResourcesDiagnosticsCapable"><i class="padlxx fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">Resources (1st party) Diagnostics capable $resourceTypesDiagnosticsMetricsLogsTrueCount/$resourceTypesDiagnosticsArraySortedCount ResourceTypes ($resourceTypesDiagnosticsMetricsTrueCount Metrics, $resourceTypesDiagnosticsLogsTrueCount Logs)</span></button>
 <div class="content TenantSummary">
-<i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Create Custom Policies for Azure ResourceTypes that support Diagnostics Logs and Metrics</span> <a class="externallink" href="https://github.com/JimGBritt/AzurePolicy/blob/master/AzureMonitor/Scripts/README.md#overview-of-create-azdiagpolicyps1" target="_blank" rel="noopener">Create-AzDiagPolicy <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+<i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Create Custom Policies for Azure ResourceTypes that support Diagnostics Logs and Metrics</span> <a class="externallink" href="https://github.com/JimGBritt/AzurePolicy/blob/main/AzureMonitor/Scripts/README.md#overview-of-create-azdiagpolicyps1" target="_blank" rel="noopener">Create-AzDiagPolicy <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 <i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Supported categories for Azure Resource Logs</span> <a class="externallink" href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/resource-logs-categories" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 <i class="padlxxx fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
 <table id= "$htmlTableId" class="summaryTable">
@@ -23869,7 +23869,7 @@ extensions: [{ name: 'sort' }]
                         [void]$htmlTenantSummary.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_DiagnosticsLifecycle"><i class="padlxx fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">ResourceDiagnostics for Logs - Policy Lifecycle recommendations</span></button>
 <div class="content TenantSummary">
-<i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Create Custom Policies for Azure ResourceTypes that support Diagnostics Logs and Metrics</span> <a class="externallink" href="https://github.com/JimGBritt/AzurePolicy/blob/master/AzureMonitor/Scripts/README.md#overview-of-create-azdiagpolicyps1" target="_blank" rel="noopener">Create-AzDiagPolicy <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
+<i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Create Custom Policies for Azure ResourceTypes that support Diagnostics Logs and Metrics</span> <a class="externallink" href="https://github.com/JimGBritt/AzurePolicy/blob/main/AzureMonitor/Scripts/README.md#overview-of-create-azdiagpolicyps1" target="_blank" rel="noopener">Create-AzDiagPolicy <i class="fa fa-external-link" aria-hidden="true"></i></a><br>
 <i class="padlxxx fa fa-lightbulb-o" aria-hidden="true"></i> <span class="info">Supported categories for Azure Resource Logs</span> <a class="externallink" href="https://docs.microsoft.com/en-us/azure/azure-monitor/platform/resource-logs-categories" target="_blank" rel="noopener">docs <i class="fa fa-external-link" aria-hidden="true"></i></a>
 <table id= "$htmlTableId" class="summaryTable">
 <thead>
@@ -29012,7 +29012,7 @@ function validateLeastPrivilegeForUser {
             }
         }
         Write-Host "The required Azure RBAC role at Management Group scope '$ManagementGroupId' is 'Reader' (acdd72a7-3385-48ef-bd42-f606fba81ae7)."
-        Write-Host "Recommendation: consider executing the script in context of a Service Principal with least privilege. Review the Azure Governance Visualizer Setup Guide at 'https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/setup.md'"
+        Write-Host "Recommendation: consider executing the script in context of a Service Principal with least privilege. Review the Azure Governance Visualizer Setup Guide at 'https://github.com/Azure/Azure-Governance-Visualizer/blob/main/setup.md'"
         Write-Host ' * * * * * * * * * * * * * * * * * * * * * *' -ForegroundColor DarkRed
         pause
     }
@@ -33755,7 +33755,7 @@ if ($azGovVizNewerVersionAvailable) {
     if (-not $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
         Write-Host ''
         Write-Host " * * * This Azure Governance Visualizer version ($ProductVersion) is not up to date. Get the latest Azure Governance Visualizer version ($azGovVizVersionOnRepositoryFull)! * * *" -ForegroundColor Green
-        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/Azure/Azure-Governance-Visualizer/blob/main/history.md'
         Write-Host ' * * * * * * * * * * * * * * * * * * * * * *' -ForegroundColor Green
         Pause
     }
@@ -35418,7 +35418,7 @@ if ($azGovVizNewerVersionAvailable) {
     if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
         Write-Host ''
         Write-Host "This Azure Governance Visualizer version ($ProductVersion) is not up to date. Get the latest Azure Governance Visualizer version ($azGovVizVersionOnRepositoryFull)!"
-        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/Azure/Azure-Governance-Visualizer/blob/main/history.md'
     }
 }
 #endregion infoNewAzGovVizVersionAvailable

@@ -183,7 +183,7 @@ if ($codeRunPlatform -eq 'AzureDevOps') {
                     Write-Host '- - - - - - - - - - - - - - - - -'
                     Write-Host 'Repository permission test failed'
                     Write-Host "You must grant the Account '$($buildAccount)' ($buildServiceAccountId) with 'Contribute' permissions on the Repository '$($htRepos.($repositoryId).name)'' ($repositoryId)"
-                    Write-Host 'Instructions: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/setup.md#grant-permissions-on-azgovviz-azdo-repository'
+                    Write-Host 'Instructions: https://github.com/Azure/Azure-Governance-Visualizer/blob/main/setup.md#grant-permissions-on-azgovviz-azdo-repository'
                     Write-Error 'Error'
                 }
                 else {

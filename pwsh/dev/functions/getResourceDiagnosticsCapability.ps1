@@ -40,7 +40,7 @@ function getResourceDiagnosticsCapability {
                 if ($skipThisResourceType -eq $false) {
                     $resourceCount = $resourceTypesUniqueGroup.Count
 
-                    #thx @Jim Britt (Microsoft) https://github.com/JimGBritt/AzurePolicy/tree/master/AzureMonitor/Scripts Create-AzDiagPolicy.ps1
+                    #thx @Jim Britt (Microsoft) https://github.com/JimGBritt/AzurePolicy/tree/main/AzureMonitor/Scripts Create-AzDiagPolicy.ps1
                     $responseJSON = ''
                     $logCategories = @()
                     $metrics = $false

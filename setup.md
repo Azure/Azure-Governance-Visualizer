@@ -95,7 +95,7 @@ Proceed with step [__Clone the Azure Governance Visualizer repository__](#clone-
 
 If the tenant is hardened (AAD External Identities / Guest user access = most restrictive) then Guest User must be assigned the AAD Role '__Directory readers__'
 
-&#x1F4A1; [Compare member and guest default permissions](https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/active-directory/fundamentals/users-default-permissions.md#compare-member-and-guest-default-permissions)
+&#x1F4A1; [Compare member and guest default permissions](https://github.com/MicrosoftDocs/azure-docs/blob/main/articles/active-directory/fundamentals/users-default-permissions.md#compare-member-and-guest-default-permissions)
 
 &#x1F4A1; [Restrict Guest permissions](https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/users-restrict-guest-permissions)
 
@@ -153,7 +153,7 @@ Proceed with step [__Clone the Azure Governance Visualizer repository__](#clone-
 
 ```powershell
 Set-Location "c:\Git"
-git clone "https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git"
+git clone "https://github.com/Azure/Azure-Governance-Visualizer.git"
 ```
 
 Proceed with step [__Run Azure Governance Visualizer from Console__](#run-azure-governance-visualizer-from-console)
@@ -196,7 +196,7 @@ Password for user \<Id\>: Enter App registration´s secret
 
 ### Run Azure Governance Visualizer
 
-Familiarize yourself with the available [parameters](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting#usage) for Azure Governance Visualizer
+Familiarize yourself with the available [parameters](https://github.com/Azure/Azure-Governance-Visualizer#usage) for Azure Governance Visualizer
 
 * PowerShell
 
@@ -220,7 +220,7 @@ c:\Git\Azure-MG-Sub-Governance-Reporting\pwsh\AzGovVizParallel.ps1 -ManagementGr
 
 ## Import Azure Governance Visualizer GitHub repository
 
-Azure Governance Visualizer Clone URL: `https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git`
+Azure Governance Visualizer Clone URL: `https://github.com/Azure/Azure-Governance-Visualizer.git`
 
 [Import into a new repo](https://docs.microsoft.com/en-us/azure/devops/repos/git/import-git-repository?view=azure-devops#import-into-a-new-repo)
 
@@ -421,7 +421,7 @@ Create a 'private' repository
 
 Click on 'Import code'
 
-Use 'https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting.git' as clone URL
+Use 'https://github.com/Azure/Azure-Governance-Visualizer.git' as clone URL
 
 Click on 'Begin import'
 
@@ -503,7 +503,7 @@ For the GitHub Actiom to authenticate and connect to Azure we need to create Ser
 * Fill the field 'Organization' with your GitHub Organization name
 * Fill the field 'Repository' with your GitHub repository name
 * For the entity type select 'Branch'
-* Fill the field 'GitHub branch name' with your branch name (default is 'master' if you imported the Azure Governance Visualizer repository)
+* Fill the field 'GitHub branch name' with your branch name (default is 'main' if you imported the Azure Governance Visualizer repository)
 * Fill the field 'Name' with a name (e.g. AzureGovernanceVisualizer_GitHub_Actions)
 * Click 'Add'
 

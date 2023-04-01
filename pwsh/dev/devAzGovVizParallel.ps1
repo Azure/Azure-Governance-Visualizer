@@ -347,8 +347,8 @@
     AUTHOR: Julian Hayward - Customer Engineer - Customer Success Unit | Azure Infrastucture/Automation/Devops/Governance | Microsoft
 
 .LINK
-    https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting (aka.ms/AzGovViz)
-    https://github.com/microsoft/CloudAdoptionFramework/tree/master/govern/AzureGovernanceVisualizer
+    https://github.com/Azure/Azure-Governance-Visualizer (aka.ms/AzGovViz)
+    https://github.com/microsoft/CloudAdoptionFramework/tree/main/govern/AzureGovernanceVisualizer
     Please note that while being developed by a Microsoft employee, Azure Governance Visualizer is not a Microsoft service or product. Azure Governance Visualizer is a personal/community driven project, there are none implicit or explicit obligations related to this project, it is provided 'as is' with no warranties and confer no rights.
 #>
 
@@ -785,7 +785,7 @@ if ($azGovVizNewerVersionAvailable) {
     if (-not $azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
         Write-Host ''
         Write-Host " * * * This Azure Governance Visualizer version ($ProductVersion) is not up to date. Get the latest Azure Governance Visualizer version ($azGovVizVersionOnRepositoryFull)! * * *" -ForegroundColor Green
-        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/Azure/Azure-Governance-Visualizer/blob/main/history.md'
         Write-Host ' * * * * * * * * * * * * * * * * * * * * * *' -ForegroundColor Green
         Pause
     }
@@ -2448,7 +2448,7 @@ if ($azGovVizNewerVersionAvailable) {
     if ($azAPICallConf['htParameters'].onAzureDevOpsOrGitHubActions) {
         Write-Host ''
         Write-Host "This Azure Governance Visualizer version ($ProductVersion) is not up to date. Get the latest Azure Governance Visualizer version ($azGovVizVersionOnRepositoryFull)!"
-        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting/blob/master/history.md'
+        Write-Host 'Check the Azure Governance Visualizer history: https://github.com/Azure/Azure-Governance-Visualizer/blob/main/history.md'
     }
 }
 #endregion infoNewAzGovVizVersionAvailable

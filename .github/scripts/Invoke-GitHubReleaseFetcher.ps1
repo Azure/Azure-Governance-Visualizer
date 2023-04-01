@@ -4,7 +4,7 @@
 # Version: 1.3.0
 # Last Modified: 01/04/2024
 # Author: Jack Tracey
-# Source: https://github.com/jtracey93/PublicScripts/blob/master/GitHub/PowerShell/Invoke-GitHubReleaseFetcher.ps1
+# Source: https://github.com/jtracey93/PublicScripts/blob/main/GitHub/PowerShell/Invoke-GitHubReleaseFetcher.ps1
 
 <#
 .SYNOPSIS
