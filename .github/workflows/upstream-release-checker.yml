@@ -63,7 +63,7 @@ jobs:
       - name: Find and Replace Upstream Repo With This Repo - Repo Paths
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "JulianHayward\/Azure-MG-Sub-Governance-Reporting"
+          find: 'JulianHayward\/Azure-MG-Sub-Governance-Reporting'
           replace: "Azure/Azure-Governance-Visualizer"
           regex: true
           exclude: '**/.github/workflows/upstream-release-checker.yml'
@@ -71,7 +71,7 @@ jobs:
       - name: Find and Replace Upstream Repo With This Repo - Branch Names
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "JulianHayward\/Azure-MG-Sub-Governance-Reporting\/master"
+          find: 'JulianHayward\/Azure-MG-Sub-Governance-Reporting\/master'
           replace: "Azure/Azure-Governance-Visualizer/main"
           regex: true
           exclude: '**/.github/workflows/upstream-release-checker.yml'
@@ -79,7 +79,7 @@ jobs:
       - name: Find and Replace Upstream Repo With This Repo - Branch Names 2
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "JulianHayward\/Azure-MG-Sub-Governance-Reporting\/blob\/master"
+          find: 'JulianHayward\/Azure-MG-Sub-Governance-Reporting\/blob\/master'
           replace: "Azure/Azure-Governance-Visualizer/blob/main"
           regex: true
           exclude: '**/.github/workflows/upstream-release-checker.yml'
