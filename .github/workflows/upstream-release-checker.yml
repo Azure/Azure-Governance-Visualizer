@@ -60,6 +60,13 @@ jobs:
           .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $keepThese -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
         working-directory: ${{ github.repository }}
 
+      - name: Find and Replace Upstream Repo With This Repo
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
+          replace: "Azure/Azure-Governance-Visualizer"
+          regex: false
+
       - name: Check for changes
         id: git_status
         run: |
