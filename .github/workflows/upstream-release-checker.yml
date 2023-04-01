@@ -56,7 +56,7 @@ jobs:
       - name: Check for upstream release and pull if available
         shell: pwsh
         run: |
-          $keepThese = @(".github/workflows/AzGovViz.yml", ".github/workflows/AzGovViz_OIDC.yml", ".azuredevops", ".devcontainer", ".vscode", "img", "pwsh", "slides", ".gitignore", "README.md", "contributionGuide.md", "history.md", "setup.md", "version.txt")
+          $keepThese = @(".github/workflows/AzGovViz.yml", ".github/workflows/AzGovViz_OIDC.yml", ".azuredevops", ".devcontainer", ".vscode", "img", "pwsh", "slides", ".gitignore", "README.md", "contributionGuide.md", "history.md", "setup.md", "version.txt", "version.json")
           .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $keepThese -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
         working-directory: ${{ github.repository }}
 
