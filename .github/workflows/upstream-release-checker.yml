@@ -60,11 +60,19 @@ jobs:
           .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $keepThese -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
         working-directory: ${{ github.repository }}
 
-      - name: Find and Replace Upstream Repo With This Repo
+      - name: Find and Replace Upstream Repo With This Repo - Repo Paths
         uses: jacobtomlinson/gha-find-replace@v3
         with:
           find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
           replace: "Azure/Azure-Governance-Visualizer"
+          regex: false
+          exclude: '**/.github/workflows/upstream-release-checker.yml'
+
+      - name: Find and Replace Upstream Repo With This Repo - Branch Names
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "JulianHayward/Azure-MG-Sub-Governance-Reporting/master"
+          replace: "Azure/Azure-Governance-Visualizer/main"
           regex: false
           exclude: '**/.github/workflows/upstream-release-checker.yml'
 
