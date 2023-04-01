@@ -71,8 +71,8 @@ jobs:
       - name: Find and Replace Upstream Repo With This Repo - Branch Names
         uses: jacobtomlinson/gha-find-replace@v3
         with:
-          find: "JulianHayward/Azure-MG-Sub-Governance-Reporting/master"
-          replace: "Azure/Azure-Governance-Visualizer/main"
+          find: "master"
+          replace: "main"
           regex: false
           exclude: '**/.github/workflows/upstream-release-checker.yml'
 
