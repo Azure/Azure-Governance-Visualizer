@@ -15,6 +15,7 @@ env:
 jobs:
   get-latest-release:
     name: Check & Pull Latest Upstream GitHub Release
+    if: github.repository == 'Azure/Azure-Governance-Visualizer' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
 
