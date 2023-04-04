@@ -191,7 +191,7 @@ if ($syncAllReleases -eq $false) {
     if ($null -eq $directoryAndFilesToKeep) {
       Write-Host ''
       Write-Host "===> Moving all extracted contents into $releaseDirectory." -ForegroundColor Cyan
-      Move-Item -Path "$($extractedSubFolder.FullName)/*" -Destination "$releaseDirectory" -Exclude '*LICENSE*' -ErrorAction SilentlyContinue
+      Move-Item -Path "$($extractedSubFolder.FullName)/*" -Destination "$releaseDirectory" -Exclude '*LICENSE*', '*.gitignore*' -ErrorAction SilentlyContinue
     }
 
     Remove-Item -Path "$releaseDirectory/tmp" -Force -Recurse
