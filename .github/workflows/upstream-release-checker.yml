@@ -57,8 +57,7 @@ jobs:
       - name: Check for upstream release and pull if available
         shell: pwsh
         run: |
-          $keepThese = @(".github", ".azuredevops", ".devcontainer", ".vscode", "img", "pwsh", "slides", ".gitignore", "README.md", "contributionGuide.md", "history.md", "setup.md", "version.txt", "version.json")
-          .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $keepThese -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
+          .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $() -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
         working-directory: ${{ github.repository }}
 
       - name: Find and Replace Upstream Repo With This Repo
