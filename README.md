@@ -73,6 +73,10 @@ Listed as [security monitoring tool](https://docs.microsoft.com/en-us/azure/arch
 
 ## Release history
 
+__Changes__ (2023-Jun-23 / 6.2.3 Minor)
+
+* fix feature 'network' - optimize handling of unknown Subscription Ids 
+
 __Changes__ (2023-Jun-16 / 6.2.1 Minor)
 
 * fix feature diagnostic capable resource name containing "+"
@@ -197,7 +201,7 @@ Short presentation on Azure Governance Visualizer [[download](slides/AzGovViz_in
     * Tags
     * Owner & User Access Administrator Role assignment count (at scope) direct and indirect plus PIM eligibility count
     * Microsoft Defender for Cloud Secure Score
-    * Microsoft Defender for Cloud Email noticifications configuration
+    * Microsoft Defender for Cloud Email notifications configuration
     * Cost
     * Management Group path
   * Tag Name usage
