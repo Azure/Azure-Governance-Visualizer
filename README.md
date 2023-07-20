@@ -30,17 +30,22 @@ Included in the Microsoft Cloud Adoption Framework´s [Strategy-Plan-Ready-Gov](
 
 Listed as [security monitoring tool](https://docs.microsoft.com/en-us/azure/architecture/framework/security/monitor-tools) in the Microsoft Well Architected Framework
 
+### Azure Governance Visualizer Accelerator
+
+The [Azure Governance Visualizer Accelerator](https://github.com/Azure/Azure-Governance-Visualizer-Accelerator) provides an easy and fast deployment process that automates the creation and publishing of AzGovViz to an Azure Web Application and provides automation to configuring the pre-requisites for AzGovViz.
+
 ### ChatGPT
 
 ![ChatGPT](img/chatGPT.png)
 
 ## Content
 
-- [Azure Governance Visualizer aka AzGovViz](#azure-governance-visualizer-aka-azgovviz)
+* [Azure Governance Visualizer aka AzGovViz](#azure-governance-visualizer-aka-azgovviz)
   * [Mission](#mission)
   * [Azure Governance Visualizer @ Microsoft CAF \& WAF](#azure-governance-visualizer--microsoft-caf--waf)
     * [Microsoft Cloud Adoption Framework (CAF)](#microsoft-cloud-adoption-framework-caf)
     * [Microsoft Well Architected Framework (WAF)](#microsoft-well-architected-framework-waf)
+    * [Azure Governance Visualizer Accelerator](#azure-governance-visualizer-accelerator)
     * [ChatGPT](#chatgpt)
   * [Content](#content)
   * [Release history](#release-history)
@@ -73,13 +78,10 @@ Listed as [security monitoring tool](https://docs.microsoft.com/en-us/azure/arch
 
 ## Release history
 
-__Changes__ (2023-Jun-23 / 6.2.3 Minor)
+__Changes__ (2023-Jul-19)
 
-* fix feature 'network' - optimize handling of unknown Subscription Ids 
-
-__Changes__ (2023-Jun-16 / 6.2.1 Minor)
-
-* fix feature diagnostic capable resource name containing "+"
+* update feature __UserAssigned Managed Identities assigned to Resources / vice versa__
+  * show if UAMI is used cross subscription (__TenantSummary__, __ScopeInsights__ & CSV output)
 
 Passed tests: Powershell Core 7.3.3 on Windows
 Passed tests: Powershell Core 7.2.10 Azure DevOps hosted agent ubuntu-22.04
@@ -349,6 +351,9 @@ VMConnection
 
 &#x1F4A1; Although 30 minutes of troubleshooting can save you 5 minutes reading the documentation :) ..
 Check the detailed __[Setup Guide](setup.md)__
+
+* You can leverage the [Azure Governance Visualizer Accelerator](https://github.com/Azure/Azure-Governance-Visualizer-Accelerator) to automate the deployment process.
+
 
 ## Technical documentation
 
