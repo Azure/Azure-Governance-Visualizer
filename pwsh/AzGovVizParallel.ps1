@@ -365,14 +365,14 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.3.4',
+    $ProductVersion = '6.3.6',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
 
     # <--- AzAPICall related parameters #consult the AzAPICall GitHub repository for details aka.ms/AzAPICall
     [string]
-    $AzAPICallVersion = '1.1.84',
+    $AzAPICallVersion = '1.1.85',
 
     [switch]
     $DebugAzAPICall,
@@ -2593,7 +2593,7 @@ function getConsumption {
             $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for $($subsToProcessInCustomDataCollectionCount) Subscriptions (QuotaId Whitelist: '$($SubscriptionQuotaIdWhitelist -join ', ')') for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
             Write-Host "$currentTask"
             #https://docs.microsoft.com/en-us/rest/api/cost-management/query/usage
-            $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=2019-11-01&`$top=5000"
+            $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=2023-03-01&`$top=5000"
             $method = 'POST'
 
             $counterBatch = [PSCustomObject] @{ Value = 0 }
@@ -2744,7 +2744,7 @@ function getConsumption {
                         #test
                         Write-Host $currentTask
                         #https://docs.microsoft.com/en-us/rest/api/cost-management/query/usage
-                        $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subIdToProcess)/providers/Microsoft.CostManagement/query?api-version=2019-11-01&`$top=5000"
+                        $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subIdToProcess)/providers/Microsoft.CostManagement/query?api-version=2023-03-01&`$top=5000"
                         $method = 'POST'
                         $subConsumptionData = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -body $body -currentTask $currentTask -listenOn 'ContentProperties'
                         if ($subConsumptionData -eq 'Unauthorized' -or $subConsumptionData -eq 'OfferNotSupported' -or $subConsumptionData -eq 'InvalidQueryDefinition' -or $subConsumptionData -eq 'NonValidWebDirectAIRSOfferType' -or $subConsumptionData -eq 'NotFoundNotSupported' -or $subConsumptionData -eq 'IndirectCostDisabled') {
@@ -2805,7 +2805,7 @@ function getConsumption {
             $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
             Write-Host "$currentTask"
             #https://docs.microsoft.com/en-us/rest/api/cost-management/query/usage
-            $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=2019-11-01&`$top=5000"
+            $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=2023-03-01&`$top=5000"
             $method = 'POST'
             $body = @"
 {
@@ -2936,7 +2936,7 @@ function getConsumption {
                         #test
                         Write-Host $currentTask
                         #https://docs.microsoft.com/en-us/rest/api/cost-management/query/usage
-                        $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subIdToProcess)/providers/Microsoft.CostManagement/query?api-version=2019-11-01&`$top=5000"
+                        $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subIdToProcess)/providers/Microsoft.CostManagement/query?api-version=2023-03-01&`$top=5000"
                         $method = 'POST'
                         $subConsumptionData = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -body $body -currentTask $currentTask -listenOn 'ContentProperties'
                         if ($subConsumptionData -eq 'Unauthorized' -or $subConsumptionData -eq 'OfferNotSupported' -or $subConsumptionData -eq 'InvalidQueryDefinition' -or $subConsumptionData -eq 'NonValidWebDirectAIRSOfferType' -or $subConsumptionData -eq 'NotFoundNotSupported' -or $subConsumptionData -eq 'IndirectCostDisabled') {
@@ -12461,7 +12461,15 @@ function processStorageAccountAnalysis {
                     }
                     else {
                         try {
-                            $xmlSaProperties = [xml]([string]$saProperties -replace $saProperties.Substring(0, 3))
+                            # ? https://github.com/Azure/Azure-Governance-Visualizer/issues/218#issuecomment-1854516882
+                            if ($saProperties.gettype().Name -eq 'Byte[]') {
+                                $byteArray = [byte[]]$saProperties
+                                $saProperties = [System.Text.Encoding]::UTF8.GetString($byteArray)
+                            }
+
+                            # $xmlSaProperties = [xml]([string]$saProperties -replace $saProperties.Substring(0, 3)) # Leading character: ï»¿ (PS version <= 7.3.9)
+                            # $xmlSaProperties = [xml]([string]$saProperties -replace $saProperties.Substring(0, 1)) # Leading character: ﻿ or U+feff (PS version >= 7.4.0)
+                            $xmlSaProperties = [xml]($saProperties -replace '^.*?<', '<') # Universal fix for all PS versions
                             if ($xmlSaProperties.StorageServiceProperties.StaticWebsite) {
                                 if ($xmlSaProperties.StorageServiceProperties.StaticWebsite.Enabled -eq $true) {
                                     $staticWebsitesState = $true
@@ -12494,7 +12502,15 @@ function processStorageAccountAnalysis {
                     }
 
                     if ($listContainersSuccess -eq $true) {
-                        $xmlListContainers = [xml]([string]$listContainers -replace $listContainers.Substring(0, 3))
+                        # ? https://github.com/Azure/Azure-Governance-Visualizer/issues/218#issuecomment-1854516882
+                        if ($listContainers.gettype().Name -eq 'Byte[]') {
+                            $byteArray = [byte[]]$listContainers
+                            $listContainers = [System.Text.Encoding]::UTF8.GetString($byteArray)
+                        }
+
+                        # $xmlListContainers = [xml]([string]$listContainers -replace $listContainers.Substring(0, 3)) # Leading character: ï»¿ (PS version <= 7.3.9)
+                        # $xmlListContainers = [xml]([string]$listContainers -replace $listContainers.Substring(0, 1)) # Leading character: ﻿ or U+feff (PS version >= 7.4.0)
+                        $xmlListContainers = [xml]($listContainers -replace '^.*?<', '<') # Universal fix for all PS versions
                         $containersCount = $xmlListContainers.EnumerationResults.Containers.Container.Count
 
                         foreach ($container in $xmlListContainers.EnumerationResults.Containers.Container) {
@@ -12793,10 +12809,12 @@ function processTenantSummary() {
                     #policy
                     if ($policyDefinitionId -like '/providers/Microsoft.Authorization/policyDefinitions/*') {
                         $LinkOrNotLinkToAzAdvertizer = ($htCacheDefinitionsPolicy).($policyDefinitionId).LinkToAzAdvertizer
+                        $policyDisplayName = ($htCacheDefinitionsPolicy).($policyDefinitionId).DisplayName
                     }
                     #policySet
                     if ($policyDefinitionId -like '/providers/Microsoft.Authorization/policySetDefinitions/*') {
                         $LinkOrNotLinkToAzAdvertizer = ($htCacheDefinitionsPolicySet).($policyDefinitionId).LinkToAzAdvertizer
+                        $policyDisplayName = ($htCacheDefinitionsPolicySet).($policyDefinitionId).DisplayName
                     }
                 }
                 else {
@@ -12808,7 +12826,6 @@ function processTenantSummary() {
                     #policySet
                     if ($policyDefinitionId -like '*/providers/Microsoft.Authorization/policySetDefinitions/*') {
                         $policyDisplayName = ($htCacheDefinitionsPolicySet).($policyDefinitionId).DisplayName
-
                     }
 
                     $LinkOrNotLinkToAzAdvertizer = "<b>$($policyDisplayName -replace '<', '&lt;' -replace '>', '&gt;')</b>"
@@ -25258,7 +25275,10 @@ tf.init();}}
                     }
                 }
                 else {
-                    $s1 = $altName -replace '.*/providers/'; $rm = $s1 -replace '.*/'; $resourceType = $s1 -replace "/$($rm)"
+                    #https://learn.microsoft.com/en-us/dotnet/api/system.text.regularexpressions.regex.escape
+                    $s1 = $altName -replace '.*/providers/'
+                    $rm = $s1 -replace '.*/'
+                    $resourceType = $s1 -replace "/$([System.Text.RegularExpressions.Regex]::Escape($rm))"
                     $miAlternativeName = $altname
                     $miResourceType = $resourceType
                 }
