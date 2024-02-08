@@ -14,6 +14,10 @@ The technical requirements as well as the required permissions are minimal.
 
 You can run the script either for your tenant root management group or any other management group.
 
+
+| :arrows_counterclockwise: | This repo is a mirror of the open source [AzGovViz project](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting) maintained by Julian Hayward, other Microsoft employees, and community members. It is mirrored here with his permission, and this mirror strives to stay in sync with released upstream versions. Please consider making product improvement recommendations on the upstream repo to prevent divergence. Thank you. |
+|-----------|:--------------------------|
+
 ## Mission
 
 "_Governance can be a complex thing_.."
@@ -29,40 +33,40 @@ Azure Governance Visualizer is intended to help you to get a holistic overview o
 
 ## Table of contents
 
-* [Azure Governance Visualizer aka AzGovViz](#azure-governance-visualizer-aka-azgovviz)
-  * [Mission](#mission)
-  * [Table of contents](#table-of-contents)
-  * [Azure Governance Visualizer @ Microsoft CAF](#azure-governance-visualizer--microsoft-caf)
-    * [Microsoft Cloud Adoption Framework (CAF)](#microsoft-cloud-adoption-framework-caf)
-    * [Azure Governance Visualizer accelerator](#azure-governance-visualizer-accelerator)
-  * [ChatGPT](#chatgpt)
-  * [:rocket: Azure Governance Visualizer deployment guide](#rocket-azure-governance-visualizer-deployment-guide)
-  * [Release history](#release-history)
-  * [Demo](#demo)
-  * [Media](#media)
-    * [Presentations](#presentations)
-  * [Features](#features)
-  * [Screenshots](#screenshots)
-  * [Outputs](#outputs)
-  * [Trust](#trust)
-  * [Technical documentation](#technical-documentation)
-    * [Permissions overview](#permissions-overview)
-    * [Required permissions in Azure](#required-permissions-in-azure)
-    * [Required permissions in Microsoft Entra ID](#required-permissions-in-microsoft-entra-id)
-    * [PowerShell](#powershell)
-    * [Parameters](#parameters)
-    * [API reference](#api-reference)
-  * [Integrate with AzOps](#integrate-with-azops)
-  * [Integrate PSRule for Azure](#integrate-psrule-for-azure)
-  * [Stats](#stats)
-    * [How / What?](#how--what)
-  * [Security](#security)
-  * [Known issues](#known-issues)
-  * [Facts](#facts)
-  * [Contribution](#contribution)
-  * [AzAdvertizer](#azadvertizer)
-  * [AzADServicePrincipalInsights](#azadserviceprincipalinsights)
-  * [Closing Note](#closing-note)
+- [Azure Governance Visualizer aka AzGovViz](#azure-governance-visualizer-aka-azgovviz)
+  - [Mission](#mission)
+  - [Table of contents](#table-of-contents)
+  - [Azure Governance Visualizer @ Microsoft CAF](#azure-governance-visualizer--microsoft-caf)
+    - [Microsoft Cloud Adoption Framework (CAF)](#microsoft-cloud-adoption-framework-caf)
+    - [Azure Governance Visualizer accelerator](#azure-governance-visualizer-accelerator)
+  - [ChatGPT](#chatgpt)
+  - [:rocket: Azure Governance Visualizer deployment guide](#rocket-azure-governance-visualizer-deployment-guide)
+  - [Release history](#release-history)
+  - [Demo](#demo)
+  - [Media](#media)
+    - [Presentations](#presentations)
+  - [Features](#features)
+  - [Screenshots](#screenshots)
+  - [Outputs](#outputs)
+  - [Trust](#trust)
+  - [Technical documentation](#technical-documentation)
+    - [Permissions overview](#permissions-overview)
+    - [Required permissions in Azure](#required-permissions-in-azure)
+    - [Required permissions in Microsoft Entra ID](#required-permissions-in-microsoft-entra-id)
+    - [PowerShell](#powershell)
+    - [Parameters](#parameters)
+    - [API reference](#api-reference)
+  - [Integrate with AzOps](#integrate-with-azops)
+  - [Integrate PSRule for Azure](#integrate-psrule-for-azure)
+  - [Stats](#stats)
+    - [How / What?](#how--what)
+  - [Security](#security)
+  - [Known issues](#known-issues)
+  - [Facts](#facts)
+  - [Contribution](#contribution)
+  - [AzAdvertizer](#azadvertizer)
+  - [AzADServicePrincipalInsights](#azadserviceprincipalinsights)
+  - [Closing Note](#closing-note)
 
 ## Azure Governance Visualizer @ Microsoft CAF
 
