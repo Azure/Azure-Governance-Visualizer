@@ -14,6 +14,9 @@ The technical requirements as well as the required permissions are minimal.
 
 You can run the script either for your tenant root management group or any other management group.
 
+| :arrows_counterclockwise: | This repo is a mirror of the open source [AzGovViz project](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting) maintained by Julian Hayward, other Microsoft employees, and community members. It is mirrored here with his permission, and this mirror strives to stay in sync with released upstream versions. Please consider making product improvement recommendations on the upstream repo to prevent divergence. Thank you. |
+|-----------|:--------------------------|
+
 ## Mission
 
 "_Governance can be a complex thing_.."
