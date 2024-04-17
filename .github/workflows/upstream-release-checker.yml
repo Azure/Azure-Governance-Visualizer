@@ -67,8 +67,8 @@ jobs:
         with:
           find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
           replace: "Azure/Azure-Governance-Visualizer"
-          regex: false
-          exclude: (?:(?:.*/)?\.github/workflows/upstream-release-checker\.yml|(?:.*/)?\.github/scripts/Invoke-ContentReplacer\.ps1)$
+          regex: true
+          exclude: '(?:(?:.*/)?\.github/workflows/upstream-release-checker\.yml|(?:.*/)?\.github/scripts/Invoke-ContentReplacer\.ps1)$'
 
       - name: Check for upstream release and pull if available
         shell: pwsh
