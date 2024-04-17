@@ -4,6 +4,14 @@
 
 ### Azure Governance Visualizer version 6
 
+__Changes__ (2024-Mar-19 / 6.4.3 Minor)
+
+* Support for `-DoAzureConsumptionPreviousMonth` - Azure Consumption data should be collected/reported for the previous month
+
+__Changes__ (2024-Mar-14 / 6.4.2 Minor)
+
+* optimize objects handling / best practices
+
 __Changes__ (2024-Feb-06 / 6.4.0 Minor)
 
 * change PowerShell parallel handling / batches
