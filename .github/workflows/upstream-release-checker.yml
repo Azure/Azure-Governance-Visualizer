@@ -68,7 +68,7 @@ jobs:
           find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
           replace: "Azure/Azure-Governance-Visualizer"
           regex: false
-          exclude: "**/.github/workflows/**"
+          exclude: "**/.github/**"
 
       - name: Find and Replace Upstream Repo With This Repo pt2
         shell: pwsh
