@@ -67,10 +67,10 @@ jobs:
         with:
           find: "JulianHayward/Azure-MG-Sub-Governance-Reporting"
           replace: "Azure/Azure-Governance-Visualizer"
-          regex: true
-          exclude: '(?:(?:.*/)?\.github/workflows/upstream-release-checker\.yml|(?:.*/)?\.github/scripts/Invoke-ContentReplacer\.ps1)$'
+          regex: false
+          exclude: "**/.github/workflows/**"
 
-      - name: Check for upstream release and pull if available
+      - name: Find and Replace Upstream Repo With This Repo pt2
         shell: pwsh
         run: |
           .github/scripts/Invoke-ContentReplacer.ps1
