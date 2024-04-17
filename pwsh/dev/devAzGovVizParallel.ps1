@@ -302,7 +302,7 @@
     Note if you use parameter -LargeTenant then parameter -NoScopeInsights will be set to true
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoScopeInsights
 
-Defines the limit (default=500) of Microsoft Entra group members; For groups that have more members than the defined limit group members will not be resolved
+    Defines the limit (default=500) of Microsoft Entra group members; For groups that have more members than the defined limit group members will not be resolved
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -AADGroupMembersLimit 750
 
     Will speed up the processing time but information like Resource diagnostics capability, resource type stats, UserAssigned Identities assigned to Resources is excluded (featured for large tenants)
@@ -365,7 +365,7 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.4.0',
+    $ProductVersion = '6.4.3',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -453,6 +453,9 @@ Param
 
     [switch]
     $DoAzureConsumption,
+
+    [switch]
+    $DoAzureConsumptionPreviousMonth,
 
     [int]
     $AzureConsumptionPeriod = 1,
@@ -938,6 +941,10 @@ if (-not $HierarchyMapOnly) {
         $arrayTotalCostSummary = @()
         $azureConsumptionStartDate = ((Get-Date).AddDays( - ($($AzureConsumptionPeriod)))).ToString('yyyy-MM-dd')
         $azureConsumptionEndDate = ((Get-Date).AddDays(-1)).ToString('yyyy-MM-dd')
+        if ($azAPICallConf['htParameters'].DoAzureConsumptionPreviousMonth -eq $true) {
+            $azureConsumptionStartDate = ((Get-Date).AddMonths(-1).AddDays( - $((Get-Date).Day) + 1)).ToString('yyyy-MM-dd')
+            $azureConsumptionEndDate = ((Get-Date).AddDays( - $((Get-Date).Day))).ToString('yyyy-MM-dd')
+        }
     }
     $customDataCollectionDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htResourceLocks = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
@@ -1155,7 +1162,7 @@ if (-not $HierarchyMapOnly) {
 
         #region Getting Available Private Endpoint Types
         $startGetAvailablePrivateEndpointTypes = Get-Date
-
+        $privateEndpointAvailabilityCheckCompleted = $false
         $subsToProcessForGettingPrivateEndpointTypes = [System.Collections.ArrayList]@()
         $prioCounter = 0
         foreach ($subscription in $subsToProcessInCustomDataCollection) {
