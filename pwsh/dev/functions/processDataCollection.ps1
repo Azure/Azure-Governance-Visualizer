@@ -139,9 +139,11 @@ function processDataCollection {
                     if (-not [string]::IsNullOrEmpty($mgdetail.properties.displayName)) {
                         $namingValidationResult = NamingValidation -toCheck $mgdetail.properties.displayName
                         if ($namingValidationResult.Count -gt 0) {
-                            $script:htNamingValidation.ManagementGroup.($mgdetail.Name) = @{}
-                            $script:htNamingValidation.ManagementGroup.($mgdetail.Name).nameInvalidChars = ($namingValidationResult -join '')
-                            $script:htNamingValidation.ManagementGroup.($mgdetail.Name).name = $mgdetail.properties.displayName
+                            $script:htNamingValidation.ManagementGroup.($mgdetail.Name) = @{
+                                nameInvalidChars = ($namingValidationResult -join '')
+                                name             = $mgdetail.properties.displayName
+                            }
+
                         }
                     }
 
@@ -187,8 +189,9 @@ function processDataCollection {
                     $policySetDefinitionsScopedCount = $functionReturn.'PolicySetDefinitionsScopedCount'
 
                     if (-not $htMgAtScopePoliciesScoped.($mgdetail.Name)) {
-                        $script:htMgAtScopePoliciesScoped.($mgdetail.Name) = @{}
-                        $script:htMgAtScopePoliciesScoped.($mgdetail.Name).ScopedCount = $policyDefinitionsScopedCount + $policySetDefinitionsScopedCount
+                        $script:htMgAtScopePoliciesScoped.($mgdetail.Name) = @{
+                            ScopedCount = $policyDefinitionsScopedCount + $policySetDefinitionsScopedCount
+                        }
                     }
 
                     $scopedPolicyCounts = @{
@@ -420,9 +423,11 @@ function processDataCollection {
                     $namingValidationResult = NamingValidation -toCheck $childMgSubDisplayName
                     if ($namingValidationResult.Count -gt 0) {
 
-                        $script:htNamingValidation.Subscription.($childMgSubId) = @{}
-                        $script:htNamingValidation.Subscription.($childMgSubId).displayNameInvalidChars = ($namingValidationResult -join '')
-                        $script:htNamingValidation.Subscription.($childMgSubId).displayName = $childMgSubDisplayName
+                        $script:htNamingValidation.Subscription.($childMgSubId) = @{
+                            displayNameInvalidChars = ($namingValidationResult -join '')
+                            displayName             = $childMgSubDisplayName
+                        }
+
                     }
                 }
 
@@ -913,11 +918,11 @@ function processDataCollection {
             $method = 'GET'
             $upperScopesPolicyAssignments = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -currentTask $currentTask -caller 'CustomDataCollection'
 
-            $upperScopesPolicyAssignments = $upperScopesPolicyAssignments | Where-Object { $_.properties.scope -ne "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" }
-            $upperScopesPolicyAssignmentsPolicyCount = (($upperScopesPolicyAssignments | Where-Object { $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policyDefinitions/' })).count
-            $upperScopesPolicyAssignmentsPolicySetCount = (($upperScopesPolicyAssignments | Where-Object { $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policySetDefinitions/' })).count
-            $upperScopesPolicyAssignmentsPolicyAtScopeCount = (($upperScopesPolicyAssignments | Where-Object { $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policyDefinitions/' -and $_.Id -match "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" })).count
-            $upperScopesPolicyAssignmentsPolicySetAtScopeCount = (($upperScopesPolicyAssignments | Where-Object { $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policySetDefinitions/' -and $_.Id -match "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" })).count
+            $upperScopesPolicyAssignments = $upperScopesPolicyAssignments.where({ $_.properties.scope -ne "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" })
+            $upperScopesPolicyAssignmentsPolicyCount = (($upperScopesPolicyAssignments.where({ $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policyDefinitions/' }))).count
+            $upperScopesPolicyAssignmentsPolicySetCount = (($upperScopesPolicyAssignments.where({ $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policySetDefinitions/' }))).count
+            $upperScopesPolicyAssignmentsPolicyAtScopeCount = (($upperScopesPolicyAssignments.where({ $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policyDefinitions/' -and $_.Id -match "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" }))).count
+            $upperScopesPolicyAssignmentsPolicySetAtScopeCount = (($upperScopesPolicyAssignments.where({ $_.properties.policyDefinitionId -match '/providers/Microsoft.Authorization/policySetDefinitions/' -and $_.Id -match "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" }))).count
             $upperScopesPolicyAssignmentsPolicyAndPolicySetAtScopeCount = ($upperScopesPolicyAssignmentsPolicyAtScopeCount + $upperScopesPolicyAssignmentsPolicySetAtScopeCount)
             foreach ($L0mgmtGroupPolicyAssignment in $upperScopesPolicyAssignments) {
 
@@ -1199,12 +1204,13 @@ function processDataCollection {
         #$upperScopesRoleAssignments = GetRoleAssignments -Scope "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" -scopeDetails "getRoleAssignments upperScopes (Mg)"
         $upperScopesRoleAssignments = $roleAssignmentsFromAPI
 
-        $upperScopesRoleAssignmentsLimitUtilization = (($upperScopesRoleAssignments | Where-Object { $_.properties.scope -eq "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" })).count
+        $upperScopesRoleAssignmentsLimitUtilization = (($upperScopesRoleAssignments.where({ $_.properties.scope -eq "/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)" }))).count
         #tenantLevelRoleAssignments
         if (-not $htMgAtScopeRoleAssignments.'tenantLevelRoleAssignments') {
-            $tenantLevelRoleAssignmentsCount = (($upperScopesRoleAssignments | Where-Object { $_.id -like '/providers/Microsoft.Authorization/roleAssignments/*' })).count
-            $htMgAtScopeRoleAssignments.'tenantLevelRoleAssignments' = @{}
-            $htMgAtScopeRoleAssignments.'tenantLevelRoleAssignments'.AssignmentsCount = $tenantLevelRoleAssignmentsCount
+            $tenantLevelRoleAssignmentsCount = (($upperScopesRoleAssignments.where({ $_.id -like '/providers/Microsoft.Authorization/roleAssignments/*' }))).count
+            $htMgAtScopeRoleAssignments.'tenantLevelRoleAssignments' = @{
+                AssignmentsCount = $tenantLevelRoleAssignmentsCount
+            }
         }
 
         foreach ($upperScopesRoleAssignment in $upperScopesRoleAssignments) {
