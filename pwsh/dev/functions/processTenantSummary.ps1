@@ -764,30 +764,34 @@ function processTenantSummary() {
                                             }
                                             $sptype = "MI $miType"
                                             $custObjectType = "ObjectType: SP $sptype, ObjectDisplayName: $($resolvedIdentity.displayName), ObjectSignInName: n/a, ObjectId: $($resolvedIdentity.id) (r)"
-                                            $ht = @{}
-                                            $ht.'ObjectType' = "SP $sptype"
-                                            $ht.'ObjectDisplayName' = $($resolvedIdentity.displayName)
-                                            $ht.'ObjectSignInName' = 'n/a'
-                                            $ht.'ObjectId' = $resolvedIdentity.id
+                                            $ht = @{
+                                                'ObjectType'        = "SP $sptype"
+                                                'ObjectDisplayName' = $($resolvedIdentity.displayName)
+                                                'ObjectSignInName'  = 'n/a'
+                                                'ObjectId'          = $resolvedIdentity.id
+                                            }
+
                                         }
                                         else {
                                             if ($resolvedIdentity.servicePrincipalType -eq 'Application') {
                                                 $sptype = 'App'
                                                 if ($resolvedIdentity.appOwnerOrganizationId -eq $azAPICallConf['checkContext'].Tenant.Id) {
                                                     $custObjectType = "ObjectType: SP $sptype INT, ObjectDisplayName: $($resolvedIdentity.displayName), ObjectSignInName: n/a, ObjectId: $($resolvedIdentity.id) (r)"
-                                                    $ht = @{}
-                                                    $ht.'ObjectType' = "SP $sptype INT"
-                                                    $ht.'ObjectDisplayName' = $($resolvedIdentity.displayName)
-                                                    $ht.'ObjectSignInName' = 'n/a'
-                                                    $ht.'ObjectId' = $resolvedIdentity.id
+                                                    $ht = @{
+                                                        'ObjectType'        = "SP $sptype INT"
+                                                        'ObjectDisplayName' = $($resolvedIdentity.displayName)
+                                                        'ObjectSignInName'  = 'n/a'
+                                                        'ObjectId'          = $resolvedIdentity.id
+                                                    }
                                                 }
                                                 else {
                                                     $custObjectType = "ObjectType: SP $sptype EXT, ObjectDisplayName: $($resolvedIdentity.displayName), ObjectSignInName: n/a, ObjectId: $($resolvedIdentity.id) (r)"
-                                                    $ht = @{}
-                                                    $ht.'ObjectType' = "SP $sptype EXT"
-                                                    $ht.'ObjectDisplayName' = $($resolvedIdentity.displayName)
-                                                    $ht.'ObjectSignInName' = 'n/a'
-                                                    $ht.'ObjectId' = $resolvedIdentity.id
+                                                    $ht = @{
+                                                        'ObjectType'        = "SP $sptype EXT"
+                                                        'ObjectDisplayName' = $($resolvedIdentity.displayName)
+                                                        'ObjectSignInName'  = 'n/a'
+                                                        'ObjectId'          = $resolvedIdentity.id
+                                                    }
                                                 }
                                             }
                                             else {
@@ -808,19 +812,22 @@ function processTenantSummary() {
                                             $hlpObjectSigninName = $resolvedIdentity.userPrincipalName
                                         }
                                         $custObjectType = "ObjectType: User, ObjectDisplayName: $hlpObjectDisplayName, ObjectSignInName: $hlpObjectSigninName, ObjectId: $($resolvedIdentity.id) (r)"
-                                        $ht = @{}
-                                        $ht.'ObjectType' = 'User'
-                                        $ht.'ObjectDisplayName' = $hlpObjectDisplayName
-                                        $ht.'ObjectSignInName' = $hlpObjectSigninName
-                                        $ht.'ObjectId' = $resolvedIdentity.id
+                                        $ht = @{
+                                            'ObjectType'        = 'User'
+                                            'ObjectDisplayName' = $hlpObjectDisplayName
+                                            'ObjectSignInName'  = $hlpObjectSigninName
+                                            'ObjectId'          = $resolvedIdentity.id
+                                        }
 
                                         $script:htResolvedIdentities.($resolvedIdentity.id).custObjectType = $custObjectType
                                         $script:htResolvedIdentities.($resolvedIdentity.id).obj = $resolvedIdentity
                                     }
                                     if (-not $htIdentitiesWithRoleAssignmentsUnique.($resolvedIdentity.id)) {
-                                        $script:htIdentitiesWithRoleAssignmentsUnique.($resolvedIdentity.id) = @{}
-                                        $script:htIdentitiesWithRoleAssignmentsUnique.($resolvedIdentity.id).details = $custObjectType
-                                        $script:htIdentitiesWithRoleAssignmentsUnique.($resolvedIdentity.id).detailsJson = $ht
+                                        $script:htIdentitiesWithRoleAssignmentsUnique.($resolvedIdentity.id) = @{
+                                            details     = $custObjectType
+                                            detailsJson = $ht
+                                        }
+
                                     }
                                 }
 
@@ -3023,7 +3030,7 @@ extensions: [{ name: 'sort' }]
         $tfCount = $policyExemptionsCount
         $htmlTableId = 'TenantSummary_policyExemptions'
 
-        $expiredExemptionsCount = ($htPolicyAssignmentExemptions.Keys | Where-Object { $htPolicyAssignmentExemptions.($_).exemption.properties.expiresOn -and $htPolicyAssignmentExemptions.($_).exemption.properties.expiresOn -lt (Get-Date).ToUniversalTime() } | Measure-Object).count
+        $expiredExemptionsCount = ($htPolicyAssignmentExemptions.Keys.where({ $htPolicyAssignmentExemptions.($_).exemption.properties.expiresOn -and $htPolicyAssignmentExemptions.($_).exemption.properties.expiresOn -lt (Get-Date).ToUniversalTime() }) | Measure-Object).count
 
         [void]$htmlTenantSummary.AppendLine(@"
 <button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_policyExemptions"><i class="padlx fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">$($policyExemptionsCount) Policy exemptions | Expired: $($expiredExemptionsCount)</span>
@@ -5794,8 +5801,9 @@ extensions: [{ name: 'sort' }]
         $htRoleAssignments4RolesCanDoRoleAssignments = @{}
         foreach ($roleAssignment4RolesCanDoRoleAssignments in $roleAssignments4RolesCanDoRoleAssignments) {
             if (-not $htRoleAssignments4RolesCanDoRoleAssignments.($roleAssignment4RolesCanDoRoleAssignments.RoleDefinitionId)) {
-                $htRoleAssignments4RolesCanDoRoleAssignments.($roleAssignment4RolesCanDoRoleAssignments.RoleDefinitionId) = @{}
-                $htRoleAssignments4RolesCanDoRoleAssignments.($roleAssignment4RolesCanDoRoleAssignments.RoleDefinitionId).roleAssignments = [System.Collections.ArrayList]@()
+                $htRoleAssignments4RolesCanDoRoleAssignments.($roleAssignment4RolesCanDoRoleAssignments.RoleDefinitionId) = @{
+                    roleAssignments = [System.Collections.ArrayList]@()
+                }
             }
             $null = $htRoleAssignments4RolesCanDoRoleAssignments.($roleAssignment4RolesCanDoRoleAssignments.RoleDefinitionId).roleAssignments.Add($roleAssignment4RolesCanDoRoleAssignments.RoleAssignmentId)
         }
@@ -6361,7 +6369,7 @@ extensions: [{ name: 'sort' }]
 
     #region SUMMARYBlueprintDefinitions
     Write-Host '  processing TenantSummary Blueprints'
-    $blueprintDefinitions = ($blueprintBaseQuery | Where-Object { [String]::IsNullOrEmpty($_.BlueprintAssignmentId) })
+    $blueprintDefinitions = ($blueprintBaseQuery.where({ [String]::IsNullOrEmpty($_.BlueprintAssignmentId) }))
     $blueprintDefinitionsCount = ($blueprintDefinitions).count
     if ($blueprintDefinitionsCount -gt 0) {
         $htmlTableId = 'TenantSummary_BlueprintDefinitions'
@@ -6450,7 +6458,7 @@ extensions: [{ name: 'sort' }]
 
     #region SUMMARYBlueprintAssignments
     Write-Host '  processing TenantSummary BlueprintAssignments'
-    $blueprintAssignments = ($blueprintBaseQuery | Where-Object { -not [String]::IsNullOrEmpty($_.BlueprintAssignmentId) })
+    $blueprintAssignments = ($blueprintBaseQuery.where({ -not [String]::IsNullOrEmpty($_.BlueprintAssignmentId) }))
     $blueprintAssignmentsCount = ($blueprintAssignments).count
 
     if ($blueprintAssignmentsCount -gt 0) {
@@ -8889,16 +8897,18 @@ extensions: [{ name: 'sort' }]
             foreach ($entry in $arrayUserAssignedIdentities4Resources) {
                 #UserAssignedIdentities
                 if (-not $htUserAssignedIdentitiesAssignedResources.($entry.miPrincipalId)) {
-                    $script:htUserAssignedIdentitiesAssignedResources.($entry.miPrincipalId) = @{}
-                    $script:htUserAssignedIdentitiesAssignedResources.($entry.miPrincipalId).ResourcesCount = 1
+                    $script:htUserAssignedIdentitiesAssignedResources.($entry.miPrincipalId) = @{
+                        ResourcesCount = 1
+                    }
                 }
                 else {
                     $script:htUserAssignedIdentitiesAssignedResources.($entry.miPrincipalId).ResourcesCount++
                 }
                 #Resources
                 if (-not $htResourcesAssignedUserAssignedIdentities.(($entry.resourceId).tolower())) {
-                    $script:htResourcesAssignedUserAssignedIdentities.(($entry.resourceId).tolower()) = @{}
-                    $script:htResourcesAssignedUserAssignedIdentities.(($entry.resourceId).tolower()).UserAssignedIdentitiesCount = 1
+                    $script:htResourcesAssignedUserAssignedIdentities.(($entry.resourceId).tolower()) = @{
+                        UserAssignedIdentitiesCount = 1
+                    }
                 }
                 else {
                     $script:htResourcesAssignedUserAssignedIdentities.(($entry.resourceId).tolower()).UserAssignedIdentitiesCount++
@@ -10985,23 +10995,23 @@ extensions: [{ name: 'sort' }]
                     foreach ($policy in $policiesThatDefineDiagnostics) {
 
                         if (
-                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.workspaceId -or
-                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.eventHubAuthorizationRuleId -or
-                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.storageAccountId
+                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.workspaceId -or
+                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.eventHubAuthorizationRuleId -or
+                            (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.storageAccountId
                         ) {
-                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.workspaceId) {
+                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.workspaceId) {
                                 $diagnosticsDestination = 'LA'
                             }
-                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.eventHubAuthorizationRuleId) {
+                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.eventHubAuthorizationRuleId) {
                                 $diagnosticsDestination = 'EH'
                             }
-                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.storageAccountId) {
+                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.storageAccountId) {
                                 $diagnosticsDestination = 'SA'
                             }
 
-                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.logs ) {
+                            if ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.logs ) {
 
-                                $resourceType = ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).type -replace '/providers/diagnosticSettings')
+                                $resourceType = ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).type -replace '/providers/diagnosticSettings')
 
                                 $resourceTypeCountFromResourceTypesSummarizedArray = ($resourceTypesSummarizedArray.where( { $_.ResourceType -eq $resourceType })).ResourceCount
                                 if ($resourceTypeCountFromResourceTypesSummarizedArray) {
@@ -11010,7 +11020,7 @@ extensions: [{ name: 'sort' }]
                                 else {
                                     $resourceCount = '0'
                                 }
-                                $supportedLogs = $resourceTypesDiagnosticsArray | Where-Object { $_.ResourceType -eq ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).type -replace '/providers/diagnosticSettings') }
+                                $supportedLogs = $resourceTypesDiagnosticsArray.where({ $_.ResourceType -eq ( (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).type -replace '/providers/diagnosticSettings') })
 
                                 $diagnosticsLogCategoriesSupported = $supportedLogs.LogCategories
                                 if (($supportedLogs | Measure-Object).count -gt 0) {
@@ -11031,7 +11041,7 @@ extensions: [{ name: 'sort' }]
                                     }
                                 }
 
-                                $policyHasPolicyAssignments = $policyBaseQuery | Where-Object { $_.PolicyDefinitionId -eq $policy.Id } | Sort-Object -Property PolicyDefinitionId, PolicyAssignmentId -Unique
+                                $policyHasPolicyAssignments = $policyBaseQuery.where({ $_.PolicyDefinitionId -eq $policy.Id }) | Sort-Object -Property PolicyDefinitionId, PolicyAssignmentId -Unique
                                 $policyHasPolicyAssignmentCount = ($policyHasPolicyAssignments | Measure-Object).count
                                 if ($policyHasPolicyAssignmentCount -gt 0) {
                                     $policyAssignmentsArray = @()
@@ -11091,7 +11101,7 @@ extensions: [{ name: 'sort' }]
                                     $priority = '4-Low'
                                 }
 
-                                $diagnosticsLogCategoriesCoveredByPolicy = (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.logs
+                                $diagnosticsLogCategoriesCoveredByPolicy = (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.logs
                                 if (($diagnosticsLogCategoriesCoveredByPolicy.category | Measure-Object).count -gt 0) {
 
                                     if (($supportedLogs | Measure-Object).count -gt 0) {
@@ -11167,7 +11177,7 @@ extensions: [{ name: 'sort' }]
                                 }
                             }
                             else {
-                                if (-not (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources | Where-Object { $_.type -match '/providers/diagnosticSettings' }).properties.metrics ) {
+                                if (-not (($policy).Json.properties.policyrule.then.details.deployment.properties.template.resources.where({ $_.type -match '/providers/diagnosticSettings' })).properties.metrics ) {
                                     Write-Host "  DiagnosticsLifeCycle check?!: $($policy.DisplayName) ($($policy.Id)) - something unexpected, no Logs and no Metrics defined"
                                 }
                             }
@@ -11179,11 +11189,11 @@ extensions: [{ name: 'sort' }]
                     #where no Policy exists
                     $diagnosticsPolicyAnalysisCount = ($diagnosticsPolicyAnalysis).count
                     if ($diagnosticsPolicyAnalysisCount -gt 0) {
-                        foreach ($resourceTypeDiagnosticsCapable in $resourceTypesDiagnosticsArray | Where-Object { $_.Logs -eq $true }) {
+                        foreach ($resourceTypeDiagnosticsCapable in $resourceTypesDiagnosticsArray.where({ $_.Logs -eq $true })) {
                             if (($diagnosticsPolicyAnalysis.ResourceType).ToLower() -notcontains ( ($resourceTypeDiagnosticsCapable.ResourceType).ToLower() )) {
-                                $supportedLogs = ($resourceTypesDiagnosticsArray | Where-Object { $_.ResourceType -eq $resourceTypeDiagnosticsCapable.ResourceType }).LogCategories
+                                $supportedLogs = ($resourceTypesDiagnosticsArray.where({ $_.ResourceType -eq $resourceTypeDiagnosticsCapable.ResourceType })).LogCategories
                                 $logsSupported = 'yes'
-                                $resourceTypeCountFromResourceTypesSummarizedArray = ($resourceTypesSummarizedArray | Where-Object { $_.ResourceType -eq $resourceTypeDiagnosticsCapable.ResourceType }).ResourceCount
+                                $resourceTypeCountFromResourceTypesSummarizedArray = ($resourceTypesSummarizedArray.where({ $_.ResourceType -eq $resourceTypeDiagnosticsCapable.ResourceType })).ResourceCount
                                 if ($resourceTypeCountFromResourceTypesSummarizedArray) {
                                     $resourceCount = $resourceTypeCountFromResourceTypesSummarizedArray
                                 }
@@ -13000,8 +13010,9 @@ tf.init();}}
     $roleAssignmentsForServicePrincipalsRgRes = (((($htCacheAssignmentsRBACOnResourceGroupsAndResources).values).where( { $_.ObjectType -eq 'ServicePrincipal' })) | Sort-Object -Property RoleAssignmentId -Unique)
     foreach ($spWithRoleAssignment in $roleAssignmentsForServicePrincipalsRgRes | Group-Object -Property ObjectId) {
         if (-not $htRoleAssignmentsForServicePrincipalsRgRes.($spWithRoleAssignment.Name)) {
-            $htRoleAssignmentsForServicePrincipalsRgRes.($spWithRoleAssignment.Name) = @{}
-            $htRoleAssignmentsForServicePrincipalsRgRes.($spWithRoleAssignment.Name).RoleAssignments = $spWithRoleAssignment.group
+            $htRoleAssignmentsForServicePrincipalsRgRes.($spWithRoleAssignment.Name) = @{
+                RoleAssignments = $spWithRoleAssignment.group
+            }
         }
     }
 

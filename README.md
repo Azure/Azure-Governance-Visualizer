@@ -14,7 +14,7 @@ The technical requirements as well as the required permissions are minimal.
 
 You can run the script either for your tenant root management group or any other management group.
 
-| :arrows_counterclockwise: | This repo is a mirror of the open source [AzGovViz project](https://github.com/JulianHayward/Azure-MG-Sub-Governance-Reporting) maintained by Julian Hayward, other Microsoft employees, and community members. It is mirrored here with his permission, and this mirror strives to stay in sync with released upstream versions. Please consider making product improvement recommendations on the upstream repo to prevent divergence. Thank you. |
+| :arrows_counterclockwise: | This repo is a mirror of the open source [AzGovViz project](https://github.com/Azure/Azure-Governance-Visualizer) maintained by Julian Hayward, other Microsoft employees, and community members. It is mirrored here with his permission, and this mirror strives to stay in sync with released upstream versions. Please consider making product improvement recommendations on the upstream repo to prevent divergence. Thank you. |
 |-----------|:--------------------------|
 
 ## Mission
@@ -89,6 +89,14 @@ The instructions to deploy the Azure Governance Visualizer is found in the __[Az
 As an alternative, you can use the [Azure Governance Visualizer accelerator](https://github.com/Azure/Azure-Governance-Visualizer-Accelerator) to deploy the Azure Governance Visualizer per code.
 
 ## Release history
+
+__Changes__ (2024-Mar-19 / 6.4.3 Minor)
+
+* Support for `-DoAzureConsumptionPreviousMonth` - Azure Consumption data should be collected/reported for the previous month
+
+__Changes__ (2024-Mar-14 / 6.4.2 Minor)
+
+* optimize objects handling / best practices
 
 __Changes__ (2024-Feb-06 / 6.4.0 Minor)
 
@@ -508,6 +516,7 @@ Screenshot of Microsoft Graph permissions in the Microsoft Entra admin center
 * ~~`-ServicePrincipalExpiryWarningDays`~~ `-AADServicePrincipalExpiryWarningDays` - Define warning period for Service Principal secret and certificate expiry; default is 14 days
 * ~~`-NoAzureConsumption`~~ - Azure Consumption data should not be collected/reported
 * `-DoAzureConsumption` - Azure Consumption data should be collected/reported
+* `-DoAzureConsumptionPreviousMonth` - Azure Consumption data should be collected/reported for the previous month
 * `-AzureConsumptionPeriod` - Define for which time period Azure Consumption data should be gathered; default is 1 day
 * `-NoAzureConsumptionReportExportToCSV` - Azure Consumption data should not be exported (CSV)
 * `-NoScopeInsights` - Q: Why would you want to do this? A: In larger tenants the ScopeInsights section blows up the html file (up to unusable due to html file size). Use `-LargeTenant` to further reduce the output.
@@ -797,3 +806,4 @@ Also check <https://aka.ms/AzADServicePrincipalInsights> - What about your Micro
 ## Closing Note
 
 Please note that while being developed by a Microsoft employee, Azure Governance Visualizer is not a Microsoft service or product. Azure Governance Visualizer is a personal/community driven project, there are no implicit or explicit obligations related to this project, it is provided 'as is' with no warranties and confer no rights.
+
