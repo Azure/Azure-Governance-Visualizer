@@ -62,6 +62,11 @@ jobs:
           .github/scripts/Invoke-GitHubReleaseFetcher.ps1 -githubRepoUrl "https://github.com/${{ env.remote_repository }}" -directoryAndFilesToKeep $() -syncAllReleases:$false -directoryForReleases "." -moveToRoot:$true
         working-directory: ${{ github.repository }}
 
+      - name: Stop specific files being changed from upstream as managed in this repo
+        run: |
+          git reset SECURITY.md
+        working-directory: ${{ github.repository }}
+
       - name: Find and Replace Upstream Repo With This Repo
         uses: jacobtomlinson/gha-find-replace@v3
         with:
