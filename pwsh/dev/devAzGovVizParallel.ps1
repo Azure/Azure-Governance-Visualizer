@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     This script creates the following files to help better understand and audit your governance setup
     csv file
@@ -365,14 +365,14 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.4.3',
+    $ProductVersion = '6.5.0',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
 
     # <--- AzAPICall related parameters #consult the AzAPICall GitHub repository for details aka.ms/AzAPICall
     [string]
-    $AzAPICallVersion = '1.2.0',
+    $AzAPICallVersion = '1.2.3',
 
     [switch]
     $DebugAzAPICall,
@@ -403,7 +403,7 @@ Param
     $NoCsvExport,
 
     [string]
-    [parameter(ValueFromPipeline)][ValidateSet(';', ',')][string]$CsvDelimiter = ';',
+    [ValidateSet(';', ',')]$CsvDelimiter = ';',
 
     [switch]
     $CsvExportUseQuotesAsNeeded,
@@ -458,7 +458,7 @@ Param
     $DoAzureConsumptionPreviousMonth,
 
     [int]
-    $AzureConsumptionPeriod = 1,
+    $AzureConsumptionPeriod = 2,
 
     [switch]
     $NoAzureConsumptionReportExportToCSV,
@@ -483,7 +483,7 @@ Param
     $DoNotIncludeResourceGroupsAndResourcesOnRBAC,
 
     [Alias('AzureDevOpsWikiHierarchyDirection')]
-    [parameter(ValueFromPipeline)][ValidateSet('TD', 'LR')][string]$MermaidDirection = 'TD',
+    [ValidateSet('TD', 'LR')][string]$MermaidDirection = 'TD',
 
     [int]
     $ChangeTrackingDays = 14,
@@ -627,7 +627,29 @@ Param
     $MSTenantIds = @('2f4a9838-26b7-47ee-be60-ccc1fdec5953', '33e01921-4d64-4f8c-a055-5bdaffd5e33d'),
 
     [array]
-    $ValidPolicyEffects = @('append', 'audit', 'auditIfNotExists', 'deny', 'denyAction', 'deployIfNotExists', 'modify', 'manual', 'disabled', 'EnforceRegoPolicy', 'enforceSetting')
+    $ValidPolicyEffects = @('addToNetworkGroup', 'append', 'audit', 'auditIfNotExists', 'deny', 'denyAction', 'deployIfNotExists', 'modify', 'manual', 'disabled', 'EnforceRegoPolicy', 'enforceSetting', 'mutate'),
+
+    [hashtable]
+    $APIMappingCloudEnvironment = @{
+        roleDefinitions     = @{
+            AzureCloud        = '2023-07-01-preview'
+            AzureUSGovernment = '2022-05-01-preview'
+            AzureChinaCloud   = '2022-05-01-preview'
+        }
+        costManagementQuery = @{
+            AzureCloud        = '2024-01-01'
+            AzureUSGovernment = '2023-09-01'
+            AzureChinaCloud   = '2023-09-01'
+        }
+        securityPricings    = @{
+            AzureCloud        = '2024-01-01'
+            AzureUSGovernment = '2023-01-01'
+            AzureChinaCloud   = '2023-01-01'
+        }
+    },
+
+    [array]
+    $SubscriptionQuotaIdsThatDoNotSupportCostManagementManagementGroupScopeQuery = @('CSP_2015-05-01') #https://learn.microsoft.com/en-us/azure/cost-management-billing/costs/understand-cost-mgt-data#supported-microsoft-azure-offers
 )
 
 $Error.clear()
@@ -639,7 +661,7 @@ Set-Item Env:\SuppressAzurePowerShellBreakingChangeWarnings 'true'
 #start
 $startAzGovViz = Get-Date
 $startTime = Get-Date -Format 'dd-MMM-yyyy HH:mm:ss'
-Write-Host "Start Azure Governance Visualizer $($startTime) (#$($ProductVersion))"
+Write-Host "Start Azure Governance Visualizer (aka $Product) $($startTime) (#$($ProductVersion))"
 
 if ($ManagementGroupId -match ' ') {
     Write-Host "Provided Management Group ID: '$($ManagementGroupId)'" -ForegroundColor Yellow
@@ -648,6 +670,7 @@ if ($ManagementGroupId -match ' ') {
 }
 
 #region Functions
+. ".\$($ScriptPath)\functions\getPrivateEndpointCapableResourceTypes.ps1"
 . ".\$($ScriptPath)\functions\validateLeastPrivilegeForUser.ps1"
 . ".\$($ScriptPath)\functions\getPolicyRemediation.ps1"
 . ".\$($ScriptPath)\functions\getPolicyHash.ps1"
@@ -682,6 +705,7 @@ if ($ManagementGroupId -match ' ') {
 . ".\$($ScriptPath)\functions\getOrphanedResources.ps1"
 . ".\$($ScriptPath)\functions\getMDfCSecureScoreMG.ps1"
 . ".\$($ScriptPath)\functions\getConsumption.ps1"
+. ".\$($ScriptPath)\functions\getConsumptionv2.ps1"
 . ".\$($ScriptPath)\functions\cacheBuiltIn.ps1"
 . ".\$($ScriptPath)\functions\prepareData.ps1"
 . ".\$($ScriptPath)\functions\getGroupmembers.ps1"
@@ -820,14 +844,14 @@ if (-not $ignoreARMLocation) {
 #EndRegion initAZAPICall
 
 #region required AzAPICall version
-if (-not ([System.Version]"$($azapicallConf['htParameters'].azAPICallModuleVersion)" -ge [System.Version]'1.1.84')) {
+if (-not ([System.Version]"$($azapicallConf['htParameters'].azAPICallModuleVersion)" -ge [System.Version]'1.2.1')) {
     Write-Host ''
     Write-Host 'Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version check failed -> https://aka.ms/AzAPICall; https://www.powershellgallery.com/packages/AzAPICall'
-    throw "This version of Azure Governance Visualizer '$ProductVersion' requires AzAPICall PowerShell module version '1.1.84' or greater"
+    throw "This version of Azure Governance Visualizer '$ProductVersion' requires AzAPICall PowerShell module version '1.2.1' or greater"
 }
 else {
     Write-Host ''
-    Write-Host "Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version requirement check succeeded: '1.1.84' or greater - current: '$($azapicallConf['htParameters'].azAPICallModuleVersion)' " -ForegroundColor Green
+    Write-Host "Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version requirement check succeeded: '1.2.1' or greater - current: '$($azapicallConf['htParameters'].azAPICallModuleVersion)' " -ForegroundColor Green
 }
 #endregion required AzAPICall version
 
@@ -915,23 +939,22 @@ $htSubDetails = @{}
 
 if (-not $HierarchyMapOnly) {
     #helper ht / collect results /save some time
-    $htCacheDefinitionsPolicy = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheDefinitionsPolicySet = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheDefinitionsRole = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheDefinitionsBlueprint = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htRoleDefinitionIdsUsedInPolicy = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htRoleAssignmentsPIM = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htCacheDefinitionsPolicy = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheDefinitionsPolicySet = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheDefinitionsRole = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheDefinitionsBlueprint = [System.Collections.Hashtable]::Synchronized(@{})
+    $htRoleAssignmentsPIM = [System.Collections.Hashtable]::Synchronized(@{})
     $htPoliciesUsedInPolicySets = @{}
-    $htSubscriptionTags = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheAssignmentsPolicyOnResourceGroupsAndResources = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheAssignmentsRole = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheAssignmentsRBACOnResourceGroupsAndResources = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheAssignmentsBlueprint = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCacheAssignmentsPolicy = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCachePolicyComplianceMG = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCachePolicyComplianceSUB = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCachePolicyComplianceResponseTooLargeMG = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htCachePolicyComplianceResponseTooLargeSUB = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htSubscriptionTags = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheAssignmentsPolicyOnResourceGroupsAndResources = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheAssignmentsRole = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheAssignmentsRBACOnResourceGroupsAndResources = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheAssignmentsBlueprint = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCacheAssignmentsPolicy = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCachePolicyComplianceMG = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCachePolicyComplianceSUB = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCachePolicyComplianceResponseTooLargeMG = [System.Collections.Hashtable]::Synchronized(@{})
+    $htCachePolicyComplianceResponseTooLargeSUB = [System.Collections.Hashtable]::Synchronized(@{})
     $outOfScopeSubscriptions = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htOutOfScopeSubscriptions = @{}
     if ($azAPICallConf['htParameters'].DoAzureConsumption -eq $true) {
@@ -947,22 +970,22 @@ if (-not $HierarchyMapOnly) {
         }
     }
     $customDataCollectionDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htResourceLocks = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htAllTagList = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htAllTagList.AllScopes = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htAllTagList.Subscription = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htAllTagList.ResourceGroup = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htAllTagList.Resource = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htResourceLocks = [System.Collections.Hashtable]::Synchronized(@{})
+    $htAllTagList = [System.Collections.Hashtable]::Synchronized(@{})
+    $htAllTagList.AllScopes = @{}
+    $htAllTagList.Subscription = @{}
+    $htAllTagList.ResourceGroup = @{}
+    $htAllTagList.Resource = @{}
     $arrayTagList = [System.Collections.ArrayList]@()
-    $htSubscriptionTagList = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htPolicyAssignmentExemptions = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htUserTypesGuest = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htSubscriptionTagList = [System.Collections.Hashtable]::Synchronized(@{})
+    $htPolicyAssignmentExemptions = [System.Collections.Hashtable]::Synchronized(@{})
+    $htUserTypesGuest = [System.Collections.Hashtable]::Synchronized(@{})
     $resourcesAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $resourcesIdsAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $resourceGroupsAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htResourceProvidersAll = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htResourceProvidersAll = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayFeaturesAll = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htResourceTypesUniqueResource = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htResourceTypesUniqueResource = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayDataCollectionProgressMg = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayDataCollectionProgressSub = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arraySubResourcesAddArrayDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
@@ -970,38 +993,38 @@ if (-not $HierarchyMapOnly) {
     $htDiagnosticSettingsMgSub = @{}
     $htDiagnosticSettingsMgSub.mg = @{}
     $htDiagnosticSettingsMgSub.sub = @{}
-    $htMgAtScopePolicyAssignments = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htMgAtScopePoliciesScoped = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htMgAtScopeRoleAssignments = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htMgAtScopePolicyAssignments = [System.Collections.Hashtable]::Synchronized(@{})
+    $htMgAtScopePoliciesScoped = [System.Collections.Hashtable]::Synchronized(@{})
+    $htMgAtScopeRoleAssignments = [System.Collections.Hashtable]::Synchronized(@{})
     $htMgASCSecureScore = @{}
-    $htConsumptionExceptionLog = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htConsumptionExceptionLog.Mg = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htConsumptionExceptionLog.Sub = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htRoleAssignmentsFromAPIInheritancePrevention = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.PolicyAssignment = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.Policy = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.PolicySet = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.Role = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.Subscription = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htNamingValidation.ManagementGroup = @{} #[System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htPrincipals = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    $htServicePrincipals = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htConsumptionExceptionLog = [System.Collections.Hashtable]::Synchronized(@{})
+    $htConsumptionExceptionLog.Mg = @{}
+    $htConsumptionExceptionLog.Sub = @{}
+    $htRoleAssignmentsFromAPIInheritancePrevention = [System.Collections.Hashtable]::Synchronized(@{})
+    $htNamingValidation = [System.Collections.Hashtable]::Synchronized(@{})
+    $htNamingValidation.PolicyAssignment = @{}
+    $htNamingValidation.Policy = @{}
+    $htNamingValidation.PolicySet = @{}
+    $htNamingValidation.Role = @{}
+    $htNamingValidation.Subscription = @{}
+    $htNamingValidation.ManagementGroup = @{}
+    $htPrincipals = [System.Collections.Hashtable]::Synchronized(@{})
+    $htServicePrincipals = [System.Collections.Hashtable]::Synchronized(@{})
     $htDailySummary = @{}
     $arrayDefenderPlans = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayDefenderPlansSubscriptionsSkipped = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayUserAssignedIdentities4Resources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htSubscriptionsRoleAssignmentLimit = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htSubscriptionsRoleAssignmentLimit = [System.Collections.Hashtable]::Synchronized(@{})
     if ($azAPICallConf['htParameters'].NoMDfCSecureScore -eq $false) {
         $htMgASCSecureScore = @{}
     }
     $htManagedIdentityForPolicyAssignment = @{}
     $htPolicyAssignmentManagedIdentity = @{}
     $htManagedIdentityDisplayName = @{}
-    $htAppDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htAppDetails = [System.Collections.Hashtable]::Synchronized(@{})
     if (-not $NoAADGroupsResolveMembers) {
-        $htAADGroupsDetails = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-        $htAADGroupsExeedingMemberLimit = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+        $htAADGroupsDetails = [System.Collections.Hashtable]::Synchronized(@{})
+        $htAADGroupsExeedingMemberLimit = [System.Collections.Hashtable]::Synchronized(@{})
         $arrayGroupRoleAssignmentsOnServicePrincipals = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
         $arrayGroupRequestResourceNotFound = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
         $arrayProgressedAADGroups = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
@@ -1011,28 +1034,27 @@ if (-not $HierarchyMapOnly) {
     }
     $arrayPsRule = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPSRuleTracking = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayOrphanedResources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPIMEligible = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $alzPolicies = @{}
     $alzPolicySets = @{}
     $alzPolicyHashes = @{}
     $alzPolicySetHashes = @{}
-    $htDoARMRoleAssignmentScheduleInstances = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htDoARMRoleAssignmentScheduleInstances = [System.Collections.Hashtable]::Synchronized(@{})
     $htDoARMRoleAssignmentScheduleInstances.Do = $true
     $storageAccounts = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayStorageAccountAnalysisResults = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htDefenderEmailContacts = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable))
+    $htDefenderEmailContacts = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayVNets = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPrivateEndPoints = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPrivateEndPointsFromResourceProperties = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htUnknownTenantsForSubscription = @{}
-    $htResourcePropertiesConvertfromJSONFailed = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
-    #$htResourcesWithProperties = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htResourcePropertiesConvertfromJSONFailed = [System.Collections.Hashtable]::Synchronized(@{})
     $htResourceProvidersRef = @{}
-    $htAvailablePrivateEndpointTypes = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htAvailablePrivateEndpointTypes = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayAdvisorScores = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htHashesBuiltInPolicy = [System.Collections.Hashtable]::Synchronized((New-Object System.Collections.Hashtable)) #@{}
+    $htHashesBuiltInPolicy = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayCustomBuiltInPolicyParity = [System.Collections.ArrayList]@()
     $arrayRemediatable = [System.Collections.ArrayList]@()
 }
@@ -1101,7 +1123,7 @@ if (-not $HierarchyMapOnly) {
     }
 
     if ($azAPICallConf['htParameters'].DoAzureConsumption -eq $true) {
-        getConsumption
+        getConsumptionv2
     }
 
     getOrphanedResources
@@ -1160,93 +1182,7 @@ if (-not $HierarchyMapOnly) {
         Write-Host "Getting Tenant Resource Providers duration: $((New-TimeSpan -Start $startGetRPs -End $endGetRPs).TotalMinutes) minutes ($((New-TimeSpan -Start $startGetRPs -End $endGetRPs).TotalSeconds) seconds)"
         #endregion Getting Tenant Resource Providers
 
-        #region Getting Available Private Endpoint Types
-        $startGetAvailablePrivateEndpointTypes = Get-Date
-        $privateEndpointAvailabilityCheckCompleted = $false
-        $subsToProcessForGettingPrivateEndpointTypes = [System.Collections.ArrayList]@()
-        $prioCounter = 0
-        foreach ($subscription in $subsToProcessInCustomDataCollection) {
-            $prioCounter++
-            if ($subscription.subscriptionId -eq $azAPICallConf['checkcontext'].Subscription.Id) {
-                $null = $subsToProcessForGettingPrivateEndpointTypes.Add([PSCustomObject]@{
-                        subscriptionInfo = $subscription
-                        prio             = 0
-                    })
-            }
-            else {
-                $null = $subsToProcessForGettingPrivateEndpointTypes.Add([PSCustomObject]@{
-                        subscriptionInfo = $subscription
-                        prio             = $prioCounter
-                    })
-            }
-        }
-
-        foreach ($subscription in $subsToProcessForGettingPrivateEndpointTypes | Sort-Object -Property prio) {
-
-            if ($privateEndpointAvailabilityCheckCompleted) {
-                continue
-            }
-
-            $subscriptionId = $subscription.subscriptionInfo.subscriptionId
-            $subscriptionName = $subscription.subscriptionInfo.subscriptionName
-
-            $currentTask = "Getting Locations for Subscription '$($subscriptionName)' ($($subscriptionId))"
-            Write-Host $currentTask
-            $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subscriptionId)/locations?api-version=2020-01-01"
-            $method = 'GET'
-            $getLocations = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -currentTask $currentTask
-            Write-Host " Returned $($getLocations.Count) locations"
-
-            Write-Host "Getting 'Available Private Endpoint Types' for Subscription '$($subscriptionName)' ($($subscriptionId)) for $($getLocations.Count) locations"
-
-            $batchSize = [math]::ceiling($getLocations.Count / $ThrottleLimit)
-            Write-Host "Optimal batch size: $($batchSize)"
-            $counterBatch = [PSCustomObject] @{ Value = 0 }
-            $getLocationsBatch = ($getLocations) | Group-Object -Property { [math]::Floor($counterBatch.Value++ / $batchSize) }
-            Write-Host "Processing data in $($getLocationsBatch.Count) batches"
-
-            $getLocationsBatch | ForEach-Object -Parallel {
-                $subscriptionId = $using:subscriptionId
-                $azAPICallConf = $using:azAPICallConf
-                $htAvailablePrivateEndpointTypes = $using:htAvailablePrivateEndpointTypes
-
-                foreach ($location in $_.Group) {
-                    $currentTask = "Getting 'Available Private Endpoint Types' for location $($location.name)"
-                    #Write-Host $currentTask
-                    $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($subscriptionId)/providers/Microsoft.Network/locations/$($location.name)/availablePrivateEndpointTypes?api-version=2022-07-01"
-                    $method = 'GET'
-                    $availablePrivateEndpointTypes = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -currentTask $currentTask -skipOnErrorCode 400, 409
-                    Write-Host " Returned $($availablePrivateEndpointTypes.Count) 'Available Private Endpoint Types' for location $($location.name)"
-                    foreach ($availablePrivateEndpointType in $availablePrivateEndpointTypes) {
-                        if (-not $htAvailablePrivateEndpointTypes.(($availablePrivateEndpointType.resourceName).ToLower())) {
-                            $script:htAvailablePrivateEndpointTypes.(($availablePrivateEndpointType.resourceName).ToLower()) = @{}
-                        }
-                    }
-                }
-            } -ThrottleLimit $ThrottleLimit
-
-            if ($htAvailablePrivateEndpointTypes.Keys.Count -gt 0) {
-                #Write-Host " Created ht for $($htAvailablePrivateEndpointTypes.Keys.Count) 'Available Private Endpoint Types'"
-                $privateEndpointAvailabilityCheckCompleted = $true
-            }
-            else {
-                Write-Host " $($htAvailablePrivateEndpointTypes.Keys.Count) 'Available Private Endpoint Types' - likely the Resource Provider 'Microsoft.Network' is not registered - trying next available subscription"
-                $privateEndpointAvailabilityCheckCompleted = $false
-            }
-        }
-
-        if ($htAvailablePrivateEndpointTypes.Keys.Count -gt 0) {
-            Write-Host " Created ht for $($htAvailablePrivateEndpointTypes.Keys.Count) 'Available Private Endpoint Types'"
-        }
-        else {
-            $throwmsg = "$($htAvailablePrivateEndpointTypes.Keys.Count) 'Available Private Endpoint Types' - Checked for $($subsToProcessForGettingPrivateEndpointTypes.Count) Subscriptions with no success. Make sure that for at least one Subscription the Resource Provider 'Microsoft.Network' is registered. Once you registered the Resource Provider for Subscription 'subscriptionEnabled' it may be a good idea to use the parameter: -SubscriptionId4AzContext '<subscriptionId of subscriptionEnabled>'"
-            Write-Host $throwmsg -ForegroundColor DarkRed
-            Throw $throwmsg
-        }
-
-        $endGetAvailablePrivateEndpointTypes = Get-Date
-        Write-Host "Getting 'Available Private Endpoint Types' duration: $((New-TimeSpan -Start $startGetAvailablePrivateEndpointTypes -End $endGetAvailablePrivateEndpointTypes).TotalMinutes) minutes ($((New-TimeSpan -Start $startGetAvailablePrivateEndpointTypes -End $endGetAvailablePrivateEndpointTypes).TotalSeconds) seconds)"
-        #endregion Getting Available Private Endpoint Types
+        getPrivateEndpointCapableResourceTypes
     }
 
     Write-Host 'Collecting custom data'
@@ -1432,6 +1368,43 @@ if (-not $HierarchyMapOnly) {
     $tenantBuiltInPoliciesCount = ($tenantBuiltInPolicies).count
     $tenantCustomPolicies = (($htCacheDefinitionsPolicy).Values).where({ $_.Type -eq 'Custom' } )
     $tenantCustomPoliciesCount = ($tenantCustomPolicies).count
+
+    #roleDefinitions used in policyDefinitions
+    Write-Host 'Processing roleDefinitions used in policyDefinitions'
+    $startRoleDefinitionsUsedInPolicyDefinitions = Get-Date
+    $htRoleDefinitionIdsUsedInPolicy = @{}
+    foreach ($policyDefinitionId in $htCacheDefinitionsPolicy.Keys) {
+        if (-not [string]::IsNullOrWhiteSpace($htCacheDefinitionsPolicy.($policyDefinitionId).Json.properties.policyRule.then.details.roleDefinitionIds)) {
+            foreach ($roledefinitionId in $htCacheDefinitionsPolicy.($policyDefinitionId).Json.properties.policyRule.then.details.roleDefinitionIds) {
+                if (-not [string]::IsNullOrWhitespace($roledefinitionId)) {
+                    $roleDefinitionIdGuid = $roledefinitionId -replace '.*/'
+                    if (-not $htCacheDefinitionsRole.($roleDefinitionIdGuid)) {
+                        Write-Host "Finding: policyDefinitionId '$($policyDefinitionId)' has unknown roleDefinitionId '$roledefinitionId' in policyRule.then.details.roleDefinitionIds" -ForegroundColor DarkRed
+                    }
+                    else {
+                        if (-not $htRoleDefinitionIdsUsedInPolicy.($roleDefinitionIdGuid)) {
+                            $htRoleDefinitionIdsUsedInPolicy.($roleDefinitionIdGuid) = [System.Collections.ArrayList]@()
+                        }
+                        try {
+                            $null = $htRoleDefinitionIdsUsedInPolicy.($roleDefinitionIdGuid).Add($policyDefinitionId)
+                        }
+                        catch {
+                            Write-Host "policyDefinitionId '$($policyDefinitionId)' JSON:"
+                            $htCacheDefinitionsPolicy.($policyDefinitionId).Json | ConvertTo-Json -Depth 99
+                            Write-Host '--->'
+                            Throw "Failed: `$policyDefinitionId: '$($policyDefinitionId)' trying to add `$roledefinitionId: '$roledefinitionId' from policyRule.then.details.roleDefinitionIds to `$htRoleDefinitionIdsUsedInPolicy.(`$roledefinitionId).UsedInPolicies"
+                        }
+                    }
+                }
+                else {
+                    Write-Host "Finding: policyDefinitionId '$($policyDefinitionId)' has empty roleDefinitionId in policyRule.then.details.roleDefinitionIds" -ForegroundColor DarkRed
+                }
+            }
+        }
+    }
+    Write-Host " $($htRoleDefinitionIdsUsedInPolicy.Keys.Count) roleDefinitions are used in policyDefinitions"
+    $endRoleDefinitionsUsedInPolicyDefinitions = Get-Date
+    Write-Host " roleDefinitions used in policyDefinitions duration: $((New-TimeSpan -Start $startRoleDefinitionsUsedInPolicyDefinitions -End $endRoleDefinitionsUsedInPolicyDefinitions).TotalSeconds) seconds"
 
     #hashes for parity builtin/custom
     Write-Host 'Processing Policy custom/built-In parity check'
@@ -1824,13 +1797,18 @@ $html = @"
         document.getElementsByTagName( "head" )[0].appendChild( link );
     </script>
     <link rel="stylesheet" type="text/css" href="https://www.azadvertizer.net/azgovvizv4/css/azgovvizmain_004_052.css">
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/jquery-3.6.0.min.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/jquery-ui-1.13.0.min.js"></script>
+    <!--<script src="https://www.azadvertizer.net/azgovvizv4/js/jquery-3.6.0.min.js"></script>-->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <!--<script src="https://www.azadvertizer.net/azgovvizv4/js/jquery-ui-1.13.0.min.js"></script>-->
+    <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js" integrity="sha256-sw0iNNXmOJbQhYFuC9OF2kOlD5KQKe1y5lfBn4C9Sjg=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="https://www.azadvertizer.net/azgovvizv4/js/highlight_v004_002.js"></script>
     <script src="https://www.azadvertizer.net/azgovvizv4/js/fontawesome-0c0b5cbde8.js"></script>
-    <script src="https://www.azadvertizer.net/azgovvizv4/tablefilter/tablefilter.js"></script>
+    <!--<script src="https://www.azadvertizer.net/azgovvizv4/tablefilter/tablefilter.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablefilter/0.7.3/tablefilter.js" integrity="sha512-HDzCUKAvjWV4XogiGFmF59gZGeNUd7X/peY+4zRQQRlqjwYngxA2haFABelr9AEhnnq65CPM/yIgdi2ffpXxcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablefilter/0.7.3/tf-1-2aa33b10e0e549020c12.min.js" integrity="sha512-KEstgdRK/uzfufHDzCmFIcjBN20mv8joRQdiQR71s0V+sP3j3mmgedDmK8i12INhG4wEWoDJHSKOpGxpAZ48qw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://www.azadvertizer.net/azgovvizv4/css/highlight-10.5.0.min.css">
-    <script src="https://www.azadvertizer.net/azgovvizv4/js/highlight-10.5.0.min.js"></script>
+    <!--<script src="https://www.azadvertizer.net/azgovvizv4/js/highlight-10.5.0.min.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js" integrity="sha512-9GIHU4rPKUMvNOHFOer5Zm2zHnZOjayOO3lZpokhhCtgt8FNlNiW/bb7kl0R5ZXfCDVPcQ8S4oBdNs92p5Nm2w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <link rel="stylesheet" type="text/css" href="https://www.azadvertizer.net/azgovvizv4/css/jsonviewer_v01.css">
     <script type="text/javascript" src="https://www.azadvertizer.net/azgovvizv4/js/jsonviewer_v02.js"></script>
@@ -2552,7 +2530,7 @@ Write-Host '--------------------'
 Write-Host "Azure Governance Visualizer ($ProductVersion) completed successful" -ForegroundColor Green
 
 if ($Error.Count -gt 0) {
-    Write-Host "Don't bother about dumped errors"
+    Write-Host "Don't bother about dumped errors, execution was successful - if you see errors above this line, those were handled by the tool and are only dumped informational."
 }
 
 if ($DoPSRule) {
