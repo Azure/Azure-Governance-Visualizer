@@ -64,7 +64,7 @@ jobs:
 
       - name: Stop specific files being changed from upstream as managed in this repo
         run: |
-          git reset SECURITY.md
+          git restore SECURITY.md
         working-directory: ${{ github.repository }}
 
       - name: Find and Replace Upstream Repo With This Repo
