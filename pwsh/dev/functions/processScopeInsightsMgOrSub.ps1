@@ -1,4 +1,4 @@
-function processScopeInsightsMgOrSub($mgOrSub, $mgChild, $subscriptionId, $subscriptionsMgId) {
+﻿function processScopeInsightsMgOrSub($mgOrSub, $mgChild, $subscriptionId, $subscriptionsMgId) {
     $script:scopescnter++
     $htmlScopeInsights = $null
     $htmlScopeInsights = [System.Text.StringBuilder]::new()
@@ -1747,14 +1747,14 @@ btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { 
                     $orphanedIncludingCost = $true
                     $hintTableTH = " ($($AzureConsumptionPeriod) days)"
 
-                    $orphanedResourcesThisSubscriptionGroupedByType = $orphanedResourcesThisSubscription.Group | Group-Object -Property type, currency
+                    $orphanedResourcesThisSubscriptionGroupedByType = $orphanedResourcesThisSubscription.Group | Group-Object -Property type, intent, currency
                     $orphanedResourcesThisSubscriptionGroupedByTypeCount = ($orphanedResourcesThisSubscriptionGroupedByType | Measure-Object).Count
                 }
                 else {
                     $orphanedIncludingCost = $false
                     $hintTableTH = ''
 
-                    $orphanedResourcesThisSubscriptionGroupedByType = $orphanedResourcesThisSubscription.Group | Group-Object -Property type
+                    $orphanedResourcesThisSubscriptionGroupedByType = $orphanedResourcesThisSubscription.Group | Group-Object -Property type, intent
                     $orphanedResourcesThisSubscriptionGroupedByTypeCount = ($orphanedResourcesThisSubscriptionGroupedByType | Measure-Object).Count
                 }
 
@@ -2302,7 +2302,8 @@ paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_
 
                 $allPSRuleResultsUnderThisMg = [system.collections.ArrayList]@()
                 foreach ($mg in $grpPSRuleManagementGroups) {
-                    if ($htManagementGroupsMgPath.($mg.name -replace '.*/').path -contains $mgchild) {
+                    $mgNameIdHlper = $mg.name -replace '.*/'
+                    if ($htManagementGroupsMgPath.($mgNameIdHlper).path -contains $mgchild) {
                         $allPSRuleResultsUnderThisMg.AddRange($mg.Group)
                     }
                 }
@@ -3930,7 +3931,8 @@ btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { 
     if (-not $NoScopeInsights) {
         if ($scopescnter % 50 -eq 0) {
             $script:scopescnter = 0
-            Write-Host '   append file duration: '(Measure-Command { $script:html | Add-Content -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName).html" -Encoding utf8 -Force }).TotalSeconds 'seconds'
+            $addContentDurationInSeconds = (Measure-Command { $script:html | Add-Content -Path "$($outputPath)$($DirectorySeparatorChar)$($fileName).html" -Encoding utf8 -Force }).TotalSeconds
+            Write-Host "   append file duration: $addContentDurationInSeconds seconds"
             $script:html = $null
         }
     }
