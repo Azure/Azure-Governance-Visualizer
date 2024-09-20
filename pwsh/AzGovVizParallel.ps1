@@ -365,7 +365,7 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.5.0',
+    $ProductVersion = '6.5.4',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -2435,51 +2435,33 @@ function detailSubscriptions {
     foreach ($childrenSubscription in $childrenSubscriptions) {
 
         $sub = $htAllSubscriptionsFromAPI.($childrenSubscription.name)
-        if ($sub.subDetails.subscriptionPolicies.quotaId.startswith('AAD_', 'CurrentCultureIgnoreCase') -or $sub.subDetails.state -ne 'Enabled') {
-            if (($sub.subDetails.subscriptionPolicies.quotaId).startswith('AAD_', 'CurrentCultureIgnoreCase')) {
-                $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
-                        subscriptionId      = $childrenSubscription.name
-                        subscriptionName    = $childrenSubscription.properties.displayName
-                        outOfScopeReason    = "QuotaId: AAD_ (State: $($sub.subDetails.state))"
-                        ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
-                        ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
-                        Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
-                    })
-            }
-            if ($sub.subDetails.state -ne 'Enabled') {
-                $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
-                        subscriptionId      = $childrenSubscription.name
-                        subscriptionName    = $childrenSubscription.properties.displayName
-                        outOfScopeReason    = "State: $($sub.subDetails.state)"
-                        ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
-                        ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
-                        Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
-                    })
-            }
+        if ($null -eq $sub.subDetails.subscriptionPolicies.quotaId) {
+            $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
+                    subscriptionId      = $childrenSubscription.name
+                    subscriptionName    = $childrenSubscription.properties.displayName
+                    outOfScopeReason    = 'QuotaId: null'
+                    ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
+                    ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
+                    Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
+                })
         }
         else {
-            if ($SubscriptionQuotaIdWhitelist[0] -ne 'undefined') {
-                $whitelistMatched = 'unknown'
-                foreach ($subscriptionQuotaIdWhitelistQuotaId in $SubscriptionQuotaIdWhitelist) {
-                    if (($sub.subDetails.subscriptionPolicies.quotaId).startswith($subscriptionQuotaIdWhitelistQuotaId, 'CurrentCultureIgnoreCase')) {
-                        $whitelistMatched = 'inWhitelist'
-                    }
-                }
-
-                if ($whitelistMatched -eq 'inWhitelist') {
-                    #write-host "$($childrenSubscription.properties.displayName) in whitelist"
-                    $null = $script:subsToProcessInCustomDataCollection.Add([PSCustomObject]@{
-                            subscriptionId      = $childrenSubscription.name
-                            subscriptionName    = $childrenSubscription.properties.displayName
-                            subscriptionQuotaId = $sub.subDetails.subscriptionPolicies.quotaId
-                        })
-                }
-                else {
-                    #Write-Host " preCustomDataCollection: $($childrenSubscription.properties.displayName) ($($childrenSubscription.name)) Subscription Quota Id: $($sub.subDetails.subscriptionPolicies.quotaId) is out of scope for Azure Governance Visualizer (not in Whitelist)"
+            if ($sub.subDetails.subscriptionPolicies.quotaId.startswith('AAD_', 'CurrentCultureIgnoreCase') -or $sub.subDetails.state -ne 'Enabled') {
+                if (($sub.subDetails.subscriptionPolicies.quotaId).startswith('AAD_', 'CurrentCultureIgnoreCase')) {
                     $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
                             subscriptionId      = $childrenSubscription.name
                             subscriptionName    = $childrenSubscription.properties.displayName
-                            outOfScopeReason    = "QuotaId: '$($sub.subDetails.subscriptionPolicies.quotaId)' not in Whitelist"
+                            outOfScopeReason    = "QuotaId: AAD_ (State: $($sub.subDetails.state))"
+                            ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
+                            ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
+                            Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
+                        })
+                }
+                if ($sub.subDetails.state -ne 'Enabled') {
+                    $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
+                            subscriptionId      = $childrenSubscription.name
+                            subscriptionName    = $childrenSubscription.properties.displayName
+                            outOfScopeReason    = "State: $($sub.subDetails.state)"
                             ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
                             ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
                             Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
@@ -2487,11 +2469,41 @@ function detailSubscriptions {
                 }
             }
             else {
-                $null = $script:subsToProcessInCustomDataCollection.Add([PSCustomObject]@{
-                        subscriptionId      = $childrenSubscription.name
-                        subscriptionName    = $childrenSubscription.properties.displayName
-                        subscriptionQuotaId = $sub.subDetails.subscriptionPolicies.quotaId
-                    })
+                if ($SubscriptionQuotaIdWhitelist[0] -ne 'undefined') {
+                    $whitelistMatched = 'unknown'
+                    foreach ($subscriptionQuotaIdWhitelistQuotaId in $SubscriptionQuotaIdWhitelist) {
+                        if (($sub.subDetails.subscriptionPolicies.quotaId).startswith($subscriptionQuotaIdWhitelistQuotaId, 'CurrentCultureIgnoreCase')) {
+                            $whitelistMatched = 'inWhitelist'
+                        }
+                    }
+
+                    if ($whitelistMatched -eq 'inWhitelist') {
+                        #write-host "$($childrenSubscription.properties.displayName) in whitelist"
+                        $null = $script:subsToProcessInCustomDataCollection.Add([PSCustomObject]@{
+                                subscriptionId      = $childrenSubscription.name
+                                subscriptionName    = $childrenSubscription.properties.displayName
+                                subscriptionQuotaId = $sub.subDetails.subscriptionPolicies.quotaId
+                            })
+                    }
+                    else {
+                        #Write-Host " preCustomDataCollection: $($childrenSubscription.properties.displayName) ($($childrenSubscription.name)) Subscription Quota Id: $($sub.subDetails.subscriptionPolicies.quotaId) is out of scope for Azure Governance Visualizer (not in Whitelist)"
+                        $null = $script:outOfScopeSubscriptions.Add([PSCustomObject]@{
+                                subscriptionId      = $childrenSubscription.name
+                                subscriptionName    = $childrenSubscription.properties.displayName
+                                outOfScopeReason    = "QuotaId: '$($sub.subDetails.subscriptionPolicies.quotaId)' not in Whitelist"
+                                ManagementGroupId   = $htSubscriptionsMgPath.($childrenSubscription.name).Parent
+                                ManagementGroupName = $htSubscriptionsMgPath.($childrenSubscription.name).ParentName
+                                Level               = $htSubscriptionsMgPath.($childrenSubscription.name).level
+                            })
+                    }
+                }
+                else {
+                    $null = $script:subsToProcessInCustomDataCollection.Add([PSCustomObject]@{
+                            subscriptionId      = $childrenSubscription.name
+                            subscriptionName    = $childrenSubscription.properties.displayName
+                            subscriptionQuotaId = $sub.subDetails.subscriptionPolicies.quotaId
+                        })
+                }
             }
         }
     }
@@ -2762,7 +2774,7 @@ function getConsumption {
         if ($subsToProcessInCustomDataCollectionCount -gt 0) {
             #region mgScopeWhitelisted
             #$subscriptionIdsOptimizedForBody = '"{0}"' -f ($subsToProcessInCustomDataCollection.subscriptionId -join '","')
-            $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for $($subsToProcessInCustomDataCollectionCount) Subscriptions (QuotaId Whitelist: '$($SubscriptionQuotaIdWhitelist -join ', ')') for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
+            $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for $($subsToProcessInCustomDataCollectionCount) Subscriptions (QuotaId Whitelist: '$($SubscriptionQuotaIdWhitelist -join ', ')') for $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
             Write-Host "$currentTask"
             #https://learn.microsoft.com/rest/api/cost-management/query/usage
             $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=$($costManagementQueryAPIVersion)&`$top=5000"
@@ -2776,7 +2788,7 @@ function getConsumption {
             foreach ($batch in $subscriptionsBatch) {
                 $batchCnt++
                 $subscriptionIdsOptimizedForBody = '"{0}"' -f (($batch.Group).subscriptionId -join '","')
-                $currenttask = "Getting Consumption data #batch$($batchCnt)/$(($subscriptionsBatch | Measure-Object).Count) (scope MG '$($ManagementGroupId)') for $(($batch.Group).Count) Subscriptions (QuotaId Whitelist: '$($SubscriptionQuotaIdWhitelist -join ', ')') for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
+                $currenttask = "Getting Consumption data #batch$($batchCnt)/$(($subscriptionsBatch | Measure-Object).Count) (scope MG '$($ManagementGroupId)') for $(($batch.Group).Count) Subscriptions (QuotaId Whitelist: '$($SubscriptionQuotaIdWhitelist -join ', ')') for $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
                 Write-Host "$currentTask" -ForegroundColor Cyan
 
                 $body = @"
@@ -2979,7 +2991,7 @@ function getConsumption {
 
         if ($subsToProcessInCustomDataCollectionCount -gt 0) {
             #region mgScope
-            $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
+            $currenttask = "Getting Consumption data (scope MG '$($ManagementGroupId)') for $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
             Write-Host "$currentTask"
             #https://learn.microsoft.com/rest/api/cost-management/query/usage
             $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=$($costManagementQueryAPIVersion)&`$top=5000"
@@ -3374,7 +3386,7 @@ function getConsumptionv2 {
     $startConsumptionData = Get-Date
 
     if ($subsToProcessInCustomDataCollectionCount -gt 0) {
-        $currenttask = "Getting Consumption data scope MG (ManagementGroupId '$($ManagementGroupId)') for $($subsToProcessInCustomDataCollectionCount) Subscriptions for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
+        $currenttask = "Getting Consumption data scope MG (ManagementGroupId '$($ManagementGroupId)') for $($subsToProcessInCustomDataCollectionCount) Subscriptions for $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
         Write-Host "$currentTask"
         #https://learn.microsoft.com/rest/api/cost-management/query/usage
         $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.Management/managementGroups/$($ManagementGroupId)/providers/Microsoft.CostManagement/query?api-version=$($costManagementQueryAPIVersion)&`$top=5000"
@@ -3398,7 +3410,7 @@ function getConsumptionv2 {
                 }
                 else {
                     $subscriptionIdsOptimizedForBody = '"{0}"' -f (($batch.Group).subscriptionId -join '","')
-                    $currenttask = "  Getting Consumption data QuotaId '$($quotaIdGroup.Name)' #batch$($batchCnt)/$(($subscriptionsBatch | Measure-Object).Count) (scope MG '$($ManagementGroupId)') for $(($batch.Group).Count) Subscriptions for period $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
+                    $currenttask = "  Getting Consumption data QuotaId '$($quotaIdGroup.Name)' #batch$($batchCnt)/$(($subscriptionsBatch | Measure-Object).Count) (scope MG '$($ManagementGroupId)') for $(($batch.Group).Count) Subscriptions for $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)"
                     Write-Host "$currentTask" -ForegroundColor Cyan
 
 
@@ -10353,7 +10365,7 @@ extensions: [{ name: 'sort' }]
                 $htmlTableId = "ScopeInsights_Consumption_$($subscriptionId -replace '-','_')"
                 $randomFunctionName = "func_$htmlTableId"
                 [void]$htmlScopeInsights.AppendLine(@"
-<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummarySub -join ', ') last $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummarySub -join ', ') $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
 <div class="content contentSISub">
 &nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
 <table id="$htmlTableId" class="$cssClass">
@@ -10952,7 +10964,7 @@ extensions: [{ name: 'sort' }]
                     $htmlTableId = "ScopeInsights_Consumption_$($mgChild -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
                     $randomFunctionName = "func_$htmlTableId"
                     [void]$htmlScopeInsights.AppendLine(@"
-<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummaryMg -join "$CsvDelimiterOpposite ") last $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummaryMg -join "$CsvDelimiterOpposite ") $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
 <div class="content contentSIMG">
 &nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV
 <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> |
@@ -27126,7 +27138,7 @@ tf.init();}}
             $tfCount = ($arrayConsumptionData | Measure-Object).Count
             $htmlTableId = 'TenantSummary_Consumption'
             [void]$htmlTenantSummary.AppendLine(@"
-<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_Consumption"><i class="padlx fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummary -join "$CsvDelimiterOpposite ") last $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
+<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_Consumption"><i class="padlx fa fa-credit-card blue" aria-hidden="true"></i> <span class="valignMiddle">Total cost $($arrayTotalCostSummary -join "$CsvDelimiterOpposite ") $AzureConsumptionPeriod days ($azureConsumptionStartDate - $azureConsumptionEndDate)</span></button>
 <div class="content TenantSummary">
 <i class="padlxx fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
 <table id="$htmlTableId" class="summaryTable">
@@ -30219,7 +30231,7 @@ function validateAccess {
             $uri = "$($azAPICallConf['azAPIEndpointUrls'].MicrosoftGraph)/beta/privilegedAccess/azureResources/resources?`$select=id,displayName,type,externalId" + $uriExt
             $res = AzAPICall -AzAPICallConfiguration $azapicallConf -uri $uri -currentTask $currentTask -validateAccess
             if ($res -eq 'failed') {
-                $permissionCheckResults += "MSGraph API 'PrivilegedAccess.Read.AzureResources' permission - check FAILED - if you cannot grant this permission or you do not have an AAD Premium 2 license then use parameter -NoPIMEligibility"
+                $permissionCheckResults += "MSGraph API 'PrivilegedAccess.Read.AzureResources' permission - check FAILED - if you cannot grant this permission or you do not have a Microsoft Entra ID P2 license, then use parameter -NoPIMEligibility"
                 $permissionsCheckFailed = $true
             }
             else {
@@ -35262,6 +35274,8 @@ if (-not $HierarchyMapOnly) {
         if ($azAPICallConf['htParameters'].DoAzureConsumptionPreviousMonth -eq $true) {
             $azureConsumptionStartDate = ((Get-Date).AddMonths(-1).AddDays( - $((Get-Date).Day) + 1)).ToString('yyyy-MM-dd')
             $azureConsumptionEndDate = ((Get-Date).AddDays( - $((Get-Date).Day))).ToString('yyyy-MM-dd')
+            # Since the start and end date is calculated to start of day, we need to add one to get the full month
+            $AzureConsumptionPeriod = (New-TimeSpan -Start $azureConsumptionStartDate -End $azureConsumptionEndDate).Days + 1
         }
     }
     $customDataCollectionDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))

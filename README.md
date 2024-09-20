@@ -84,19 +84,13 @@ The [Azure Governance Visualizer accelerator](https://github.com/Azure/Azure-Gov
 
 ## Release history
 
-**Changes** (2024-August-15 / 6.5.0 Minor/Patch)
+**Changes** (2024-September-19 / 6.5.4 Patch)
 
-- ALZ policy refresh H2 FY24 (initiatives.json)
-- [DevSkim](https://github.com/microsoft/DevSkim-Action), [PSScriptAnalyzer](https://github.com/microsoft/psscriptanalyzer-action) and [OpenSSF Scorecard](https://github.com/ossf/scorecard?tab=readme-ov-file#scorecard-github-action) integration
-- fixes and optimization based on DevSkim, PSScriptAnalyzer and OpenSSF Scorecard findings
-- api version mapping in param block for cloud environment api version availability drift
-- update GitHub workflows to use azure/login@v2 (previous: azure/login@v1):
-  - [AzGovViz_OIDC.yml](/.github/workflows/AzGovViz_OIDC.yml)
-  - [AzGovViz.yml](/.github/workflows/AzGovViz.yml)
-- update getConsumption (getConsumptionv2): instead of full Management Group scope costmanagement data retrieval, batch by Subscription quotaId in batches of 100. Failing batches and batches of Subscriptions of quotaId `CSP_2015-05-01` (see param block variable `SubscriptionQuotaIdsThatDoNotSupportCostManagementManagementGroupScopeQuery`) will fallback to get costmanagement data per Subscription.
-- html; update jquery; source tablefilter js
-- update `.devcontainer/devcontainer.json`
-- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.2.3 (Handle costManagement error `SubscriptionCostDisabled`)
+- minor PSScriptAnalyzer finding resolved
+
+**Changes** (2024-September-17 / 6.5.3 Patch)
+
+- fix stop error for subscriptions with null valued quotaId. the function detailSubscription uses `.startsWith()` method to check for `AAD_` but cannot validate when a null-valued `.quotaId` occurs.
 
 [Full release history](history.md)
 
