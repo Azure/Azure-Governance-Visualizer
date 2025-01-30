@@ -36,6 +36,9 @@
 .PARAMETER SubscriptionQuotaIdWhitelist
     default is 'undefined', this parameter defines the QuotaIds the subscriptions must match so that Azure Governance Visualizer processes them. The script checks if the QuotaId startswith the string that you have put in. Separate multiple strings with comma e.g. MSDN_,EnterpriseAgreement_
 
+.PARAMETER SubscriptionIdWhitelist
+    default is 'undefined', this parameter defines the subscriptions that must match in order for the Azure Governance Visualizer to process them. Separate multiple strings with comma e.g. 2f4a9838-26b7-47ee-be60-ccc1fdec5953,33e01921-4d64-4f8c-a055-5bdaffd5e33d
+
 .PARAMETER NoPolicyComplianceStates
     use this parameter if policy compliance states should not be queried
 
@@ -215,6 +218,9 @@
     Define the QuotaId whitelist by providing strings separated by a comma
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -SubscriptionQuotaIdWhitelist MSDN_,EnterpriseAgreement_
 
+    Define the subscriptions whitelist by providing strings separated by a comma
+    PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -SubscriptionIdWhitelist 2f4a9838-26b7-47ee-be60-ccc1fdec5953,33e01921-4d64-4f8c-a055-5bdaffd5e33d
+
     Define if policy compliance states should be queried
     PS C:\>.\AzGovVizParallel.ps1 -ManagementGroupId <your-Management-Group-Id> -NoPolicyComplianceStates
 
@@ -365,14 +371,14 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.5.0',
+    $ProductVersion = '6.6.1',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
 
     # <--- AzAPICall related parameters #consult the AzAPICall GitHub repository for details aka.ms/AzAPICall
     [string]
-    $AzAPICallVersion = '1.2.3',
+    $AzAPICallVersion = '1.2.4',
 
     [switch]
     $DebugAzAPICall,
@@ -435,6 +441,9 @@ Param
 
     [array]
     $SubscriptionQuotaIdWhitelist = @('undefined'),
+
+    [array]
+    $SubscriptionIdWhitelist = @('undefined'),
 
     [switch]
     $NoPolicyComplianceStates,
@@ -670,6 +679,7 @@ if ($ManagementGroupId -match ' ') {
 }
 
 #region Functions
+. ".\$($ScriptPath)\functions\processMDfCCoverage.ps1"
 . ".\$($ScriptPath)\functions\getPrivateEndpointCapableResourceTypes.ps1"
 . ".\$($ScriptPath)\functions\validateLeastPrivilegeForUser.ps1"
 . ".\$($ScriptPath)\functions\getPolicyRemediation.ps1"
@@ -844,14 +854,14 @@ if (-not $ignoreARMLocation) {
 #EndRegion initAZAPICall
 
 #region required AzAPICall version
-if (-not ([System.Version]"$($azapicallConf['htParameters'].azAPICallModuleVersion)" -ge [System.Version]'1.2.1')) {
+if (-not ([System.Version]"$($azapicallConf['htParameters'].azAPICallModuleVersion)" -ge [System.Version]'1.2.4')) {
     Write-Host ''
     Write-Host 'Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version check failed -> https://aka.ms/AzAPICall; https://www.powershellgallery.com/packages/AzAPICall'
-    throw "This version of Azure Governance Visualizer '$ProductVersion' requires AzAPICall PowerShell module version '1.2.1' or greater"
+    throw "This version of Azure Governance Visualizer '$ProductVersion' requires AzAPICall PowerShell module version '1.2.4' or greater"
 }
 else {
     Write-Host ''
-    Write-Host "Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version requirement check succeeded: '1.2.1' or greater - current: '$($azapicallConf['htParameters'].azAPICallModuleVersion)' " -ForegroundColor Green
+    Write-Host "Azure Governance Visualizer version '$ProductVersion' - AzAPICall PowerShell module version requirement check succeeded: '1.2.4' or greater - current: '$($azapicallConf['htParameters'].azAPICallModuleVersion)' " -ForegroundColor Green
 }
 #endregion required AzAPICall version
 
@@ -967,6 +977,8 @@ if (-not $HierarchyMapOnly) {
         if ($azAPICallConf['htParameters'].DoAzureConsumptionPreviousMonth -eq $true) {
             $azureConsumptionStartDate = ((Get-Date).AddMonths(-1).AddDays( - $((Get-Date).Day) + 1)).ToString('yyyy-MM-dd')
             $azureConsumptionEndDate = ((Get-Date).AddDays( - $((Get-Date).Day))).ToString('yyyy-MM-dd')
+            # Since the start and end date is calculated to start of day, we need to add one to get the full month
+            $AzureConsumptionPeriod = (New-TimeSpan -Start $azureConsumptionStartDate -End $azureConsumptionEndDate).Days + 1
         }
     }
     $customDataCollectionDuration = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
@@ -1013,6 +1025,7 @@ if (-not $HierarchyMapOnly) {
     $htDailySummary = @{}
     $arrayDefenderPlans = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayDefenderPlansSubscriptionsSkipped = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
+    $htSecuritySettings = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayUserAssignedIdentities4Resources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $htSubscriptionsRoleAssignmentLimit = [System.Collections.Hashtable]::Synchronized(@{})
     if ($azAPICallConf['htParameters'].NoMDfCSecureScore -eq $false) {

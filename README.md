@@ -84,19 +84,22 @@ The [Azure Governance Visualizer accelerator](https://github.com/Azure/Azure-Gov
 
 ## Release history
 
-**Changes** (2024-August-15 / 6.5.0 Minor/Patch)
+**Changes** (2024-November-01 / 6.6.1 Patch)
 
-- ALZ policy refresh H2 FY24 (initiatives.json)
-- [DevSkim](https://github.com/microsoft/DevSkim-Action), [PSScriptAnalyzer](https://github.com/microsoft/psscriptanalyzer-action) and [OpenSSF Scorecard](https://github.com/ossf/scorecard?tab=readme-ov-file#scorecard-github-action) integration
-- fixes and optimization based on DevSkim, PSScriptAnalyzer and OpenSSF Scorecard findings
-- api version mapping in param block for cloud environment api version availability drift
-- update GitHub workflows to use azure/login@v2 (previous: azure/login@v1):
-  - [AzGovViz_OIDC.yml](/.github/workflows/AzGovViz_OIDC.yml)
-  - [AzGovViz.yml](/.github/workflows/AzGovViz.yml)
-- update getConsumption (getConsumptionv2): instead of full Management Group scope costmanagement data retrieval, batch by Subscription quotaId in batches of 100. Failing batches and batches of Subscriptions of quotaId `CSP_2015-05-01` (see param block variable `SubscriptionQuotaIdsThatDoNotSupportCostManagementManagementGroupScopeQuery`) will fallback to get costmanagement data per Subscription.
-- html; update jquery; source tablefilter js
-- update `.devcontainer/devcontainer.json`
-- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.2.3 (Handle costManagement error `SubscriptionCostDisabled`)
+- HTML fix filters __TenantSummary__ PolicyAssignment, __ScopeInsights__ PolicySetAssignments
+- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.2.4 (Handle 'subscription not registered' `/providers/Microsoft.Security/settings`)
+
+**Changes** (2024-October-26 / 6.6.0 Minor)
+
+- Microsoft Defender for Cloud Coverage (Tenant Summary and CSV export). Example html:
+![MicrosoftDefenderForCloudCoverage_preview](img/MicrosoftDefenderForCloudCoverage_preview.png)
+- CostOptimization add `microsoft.network/privateendpoints` for intent=cost savings
+- extend ResourcesAll.csv output with sku and kind information
+- update [API reference](#api-reference) '/subscriptions/`subscriptionId`/resources' use API version 2024-03-01 (previous 2023-07-01)
+
+**Changes** (2024-October-9 / 6.5.5 Patch)
+
+- introduce a new optional [parameter](#parameters) `-SubscriptionIdWhitelist`, which defines the subscriptions that must match in order to be processed.
 
 [Full release history](history.md)
 
@@ -496,6 +499,7 @@ Screenshot of Microsoft Graph permissions in the Microsoft Entra admin center
 - `-LimitCriticalPercentage` - Limit warning level, default is 80%
 - ~~`-HierarchyTreeOnly`~~ `-HierarchyMapOnly` - Output only the **HierarchyMap** for Management Groups including linked Subscriptions
 - `-SubscriptionQuotaIdWhitelist` - Process only Subscriptions with defined QuotaId(s). Example: .\AzGovVizParallel.ps1 `-SubscriptionQuotaIdWhitelist MSDN_,Enterprise_`
+- `-SubscriptionIdWhitelist` - Process only defined Subscriptions. Example: .\AzGovVizParallel.ps1 `-SubscriptionIdWhitelist 2f4a9838-26b7-47ee-be60-ccc1fdec5953,33e01921-4d64-4f8c-a055-5bdaffd5e33d`
 - `-NoResourceProvidersDetailed` - Disables output for ResourceProvider states for all Subscriptions in the **TenantSummary** section, in large Tenants this can become time consuming
 - `-NoResourceProvidersAtAll` - Resource Providers will not be collected
 - `-NoMDfCSecureScore` - Disables Microsoft Defender for Cloud Secure Score request for Subscriptions and Management Groups.
@@ -612,9 +616,10 @@ Azure Governance Visualizer polls the following APIs
 | ARM      | 2024-01-01         | /subscriptions/`subscriptionId`/providers/Microsoft.Security/pricings                                                                  |
 | ARM      | 2020-01-01         | /subscriptions/`subscriptionId`/providers/Microsoft.Security/securescores                                                              |
 | ARM      | 2020-01-01-preview | /subscriptions/`subscriptionId`/providers/Microsoft.Security/securityContacts                                                          |
+| ARM      | 2022-05-01         | /subscriptions/`subscriptionId`/providers/Microsoft.Security/settings                                                          |
 | ARM      | 2019-10-01         | /subscriptions/`subscriptionId`/providers                                                                                              |
 | ARM      | 2021-04-01         | /subscriptions/`subscriptionId`/resourcegroups                                                                                         |
-| ARM      | 2023-07-01         | /subscriptions/`subscriptionId`/resources                                                                                              |
+| ARM      | 2024-03-01         | /subscriptions/`subscriptionId`/resources                                                                                              |
 | ARM      | 2020-01-01         | /subscriptions                                                                                                                         |
 | ARM      | 2020-01-01         | /tenants                                                                                                                               |
 
