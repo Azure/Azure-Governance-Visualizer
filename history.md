@@ -4,6 +4,22 @@
 
 ### Azure Governance Visualizer version 6
 
+**Changes** (2024-November-01 / 6.6.1 Patch)
+
+- HTML fix filters __TenantSummary__ PolicyAssignment, __ScopeInsights__ PolicySetAssignments
+- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.2.4 (Handle 'subscription not registered' `/providers/Microsoft.Security/settings`)
+
+**Changes** (2024-October-26 / 6.6.0 Minor)
+
+- Microsoft Defender for Cloud Coverage (Tenant Summary and CSV export)
+![MicrosoftDefenderForCloudCoverage_preview](img/MicrosoftDefenderForCloudCoverage_preview.png)
+- CostOptimization add `microsoft.network/privateendpoints` for intent=cost savings
+- extend ResourcesAll.csv output with sku and kind information
+- update [API reference](#api-reference) '/subscriptions/`subscriptionId`/resources' use API version 2024-03-01 (previous 2023-07-01)
+
+**Changes** (2024-October-9 / 6.5.5 Patch)
+
+- introduce a new optional parameter `-SubscriptionIdWhitelist`, which defines the subscriptions that must match in order to be processed.
 
 **Changes** (2024-September-19 / 6.5.4 Patch)
 
