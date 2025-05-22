@@ -86,11 +86,20 @@ Azure Architecture Center (Landing zones): [Azure Governance Visualizer deployme
 
 ## Release history
 
+**Changes** (2025-May-21 / 6.7.2 Patch)
+
+- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.4.1 (previous 1.4.0). Handle token refresh for OIDC in Azure Devops and GitHub Actions fix
+
+**Changes** (2025-May-20 / 6.7.1 Patch)
+
+- use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.4.0 (previous 1.2.4). Handle token refresh for OIDC in Azure Devops and GitHub Actions
+
 **Changes** (2025-May-19 / 6.7.0 Minor)
 
 - New feature "ALZ Policy Assignments Checker" - This new view, will compare the current deployed ALZ hierarchy with the ALZ archetypes definitions and point out the missing policy assignments. It will also reference the missing policy assignments' payloads and [AzAdvertizer](https://www.azadvertizer.net/) links.
   - New switch-parameter `-ALZPolicyAssignmentsChecker` - Execute the ALZPolicyAssignmentsChecker feature
   - New Parameter `-ALZManagementGroupsIds` - Provide the Management Group Ids of the deployed ALZ hierarchy (more details: [Parameters](#parameters))
+  - [techcommunity blog post](https://techcommunity.microsoft.com/blog/azuregovernanceandmanagementblog/keep-your-azure-landing-zones-policy-assignments-up-to-date-with-azure-governanc/4292789)
 
 [Full release history](history.md)
 
@@ -547,7 +556,7 @@ Screenshot of Microsoft Graph permissions in the Microsoft Entra admin center
 - `-NoNetwork` - Do not execute Network analysis / Virtual Network and Virtual Network Peerings
   - `-NetworkSubnetIPAddressUsageCriticalPercentage` - Warning level when certain percentage of IP addresses is used (default = 90%)
 - `-TenantId4AzContext` - Define the Tenant Id to use for AzContext (default is to use the Tenant Id from the current context)
-- `-ALZPolicyAssignmentsChecker` - Execute the 'Azure Landing Zones (ALZ) Policy Assignments Checker' feature
+- `-ALZPolicyAssignmentsChecker` - Execute the 'Azure Landing Zones (ALZ) Policy Assignments Checker' feature. [techcommunity blog post](https://techcommunity.microsoft.com/blog/azuregovernanceandmanagementblog/keep-your-azure-landing-zones-policy-assignments-up-to-date-with-azure-governanc/4292789)
 - `-ALZManagementGroupsIds` - if your Management Group (MG) structure deviates from the ALZ defaults, then you will need to map your MG structure to the default ALZ structure. If your MG structure does not deviate from the ALZ defaults then you do not need to define this parameter
 
 _example:_
@@ -561,7 +570,7 @@ _example:_
   landing_zones  = '<Landing_zones Management Group Id>'
   corp           = '<Corp Management Group Id>'
   online         = '<Online Management Group Id>'
-  sandboxes      = '<Sandboxes Management Group Id>'
+  sandbox      = '<Sandbox Management Group Id>'
   decommissioned = '<Decommissioned Management Group Id>'
 }
 ```
