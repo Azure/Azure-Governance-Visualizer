@@ -184,7 +184,7 @@
         landing_zones  = '<Landing_zones management group Id>'
         corp           = '<Corp management group Id>'
         online         = '<Online management group Id>'
-        sandboxes      = '<Sandboxes management group Id>'
+        sandbox        = '<Sandbox management group Id>'
         decommissioned = '<Decommissioned management group Id>'
     }
 
@@ -372,7 +372,7 @@
         landing_zones  = '<Landing_zones management group Id>'
         corp           = '<Corp management group Id>'
         online         = '<Online management group Id>'
-        sandboxes      = '<Sandboxes management group Id>'
+        sandbox        = '<Sandbox management group Id>'
         decommissioned = '<Decommissioned management group Id>'
     }
 
@@ -406,7 +406,7 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.7.1',
+    $ProductVersion = '6.7.2',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -416,7 +416,7 @@ Param
     [ValidateSet('AzAPICall', 'AzAPICallBeta')]$AzAPICallModuleName = 'AzAPICall',
 
     [string]
-    $AzAPICallVersion = '1.4.0',
+    $AzAPICallVersion = '1.4.1',
 
     [switch]
     $DebugAzAPICall,
@@ -617,7 +617,7 @@ Param
         landing_zones  = '<Landing_zones management group Id>'
         corp           = '<Corp management group Id>'
         online         = '<Online management group Id>'
-        sandboxes      = '<Sandboxes management group Id>'
+        sandbox        = '<Sandbox management group Id>'
         decommissioned = '<Decommissioned management group Id>'
     }#>,
 
