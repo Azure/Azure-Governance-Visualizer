@@ -9781,7 +9781,8 @@ function processNetwork {
                     $subnetNetOutput = $arr
                 }
 
-                $Mask = $AddressPrefix.substring($AddressPrefix.Length - 2, 2)
+                # Extract mask properly to handle both single and double digit prefixes
+                $Mask = ($AddressPrefix -split '/')[-1]
 
                 #Amount of available IP Addresses minus the 3 IPs that Azure consumes, minus net and broadcast
                 #https://learn.microsoft.com/azure/virtual-network/virtual-networks-faq#are-there-any-restrictions-on-using-ip-addresses-within-these-subnets
@@ -9821,13 +9822,28 @@ function processNetwork {
                 #endregion IP address usage
 
                 $subnetPrefix = $AddressPrefix -replace '.*/'
-
-                $subnetmask = ([IPAddress]"$([system.convert]::ToInt64(('1'*$subnetPrefix).PadRight(32,'0'),2))").IPAddressToString
-                $IPBits = [int[]]$subnetNet.Split('.')
-                $MaskBits = [int[]]$subnetmask.Split('.')
-                $NetworkIDBits = 0..3 | ForEach-Object { $IPBits[$_] -band $MaskBits[$_] }
-                $Broadcast = (0..3 | ForEach-Object { $NetworkIDBits[$_] + ($MaskBits[$_] -bxor 255) }) -join '.'
-                $Range = "$subnetNet - $Broadcast"
+                
+                # Validate subnet prefix to prevent IP address conversion errors
+                if ([string]::IsNullOrWhiteSpace($subnetPrefix) -or $subnetPrefix -eq '-1' -or $subnetPrefix -notmatch '^\d+$' -or [int]$subnetPrefix -lt 0 -or [int]$subnetPrefix -gt 32) {
+                    Write-Warning "Invalid subnet prefix '$subnetPrefix' for address prefix '$AddressPrefix'. Skipping subnet mask calculation."
+                    $subnetmask = "Invalid"
+                    $Range = "Invalid"
+                }
+                else {
+                    try {
+                        $subnetmask = ([IPAddress]"$([system.convert]::ToInt64(('1'*$subnetPrefix).PadRight(32,'0'),2))").IPAddressToString
+                        $IPBits = [int[]]$subnetNet.Split('.')
+                        $MaskBits = [int[]]$subnetmask.Split('.')
+                        $NetworkIDBits = 0..3 | ForEach-Object { $IPBits[$_] -band $MaskBits[$_] }
+                        $Broadcast = (0..3 | ForEach-Object { $NetworkIDBits[$_] + ($MaskBits[$_] -bxor 255) }) -join '.'
+                        $Range = "$subnetNet - $Broadcast"
+                    }
+                    catch {
+                        Write-Warning "Failed to calculate subnet mask for prefix '$subnetPrefix' and address '$AddressPrefix': $($_.Exception.Message)"
+                        $subnetmask = "Error"
+                        $Range = "Error"
+                    }
+                }
 
                 $null = $script:arraySubnets.Add([PSCustomObject]@{
                         SubscriptionName                  = $subscriptionName
