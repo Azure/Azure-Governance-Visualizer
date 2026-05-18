@@ -35801,10 +35801,11 @@ function dataCollectionClassicAdministratorsSub {
         method                 = 'GET'
         currentTask            = "classicAdministrators '$($scopeDisplayName)' ('$scopeId') [quotaId:'$subscriptionQuotaId']"
         AzAPICallConfiguration = $azAPICallConf
+        unhandledErrorAction   = 'ContinueQuiet'
     }
 
     $AzApiCallResult = AzAPICall @azAPICallPayload
-    if ($AzApiCallResult -ne 'ClassicAdministratorListFailed') {
+    if ($AzApiCallResult -ne 'ClassicAdministratorListFailed' -and $AzApiCallResult -ne 'InvalidResourceType') {
         $arrayClassicAdministrators = [System.Collections.ArrayList]@()
         foreach ($roleAll in $AzApiCallResult) {
             $splitPropertiesRole = $roleAll.properties.role.Split(';')
