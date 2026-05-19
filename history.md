@@ -4,6 +4,10 @@
 
 ### Azure Governance Visualizer version 6
 
+**Changes** (2026-May-18 / 6.7.3 Patch)
+
+- fix issue 294; retirement Classic Administrators
+
 **Changes** (2025-May-21 / 6.7.2 Patch)
 
 - use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.4.1 (previous 1.4.0). Handle token refresh for OIDC in Azure Devops and GitHub Actions fix

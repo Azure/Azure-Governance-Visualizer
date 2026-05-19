@@ -350,7 +350,6 @@
             $htSubscriptionsRoleAssignmentLimit = $using:htSubscriptionsRoleAssignmentLimit
             $arrayPsRule = $using:arrayPsRule
             $arrayPSRuleTracking = $using:arrayPSRuleTracking
-            $htClassicAdministrators = $using:htClassicAdministrators
             $htRoleAssignmentsPIM = $using:htRoleAssignmentsPIM
             $alzPolicies = $using:alzPolicies
             $alzPolicySets = $using:alzPolicySets
@@ -392,7 +391,6 @@
             $function:dataCollectionPolicyAssignmentsSub = $using:funcDataCollectionPolicyAssignmentsSub
             $function:dataCollectionRoleDefinitions = $using:funcDataCollectionRoleDefinitions
             $function:dataCollectionRoleAssignmentsSub = $using:funcDataCollectionRoleAssignmentsSub
-            $function:dataCollectionClassicAdministratorsSub = $using:funcDataCollectionClassicAdministratorsSub
             $function:dataCollectionDefenderEmailContacts = $using:funcDataCollectionDefenderEmailContacts
             $function:dataCollectionVNets = $using:funcDataCollectionVNets
             $function:dataCollectionPrivateEndpoints = $using:funcDataCollectionPrivateEndpoints
@@ -576,9 +574,6 @@
                         if ($functionReturn.'addRowToTableDone') {
                             $addRowToTableDone = $true
                         }
-
-                        #SubscriptionClassicAdministrators
-                        dataCollectionClassicAdministratorsSub @baseParameters -SubscriptionMgPath $childMgMgPath
                     }
 
                     if ($addRowToTableDone -ne $true) {

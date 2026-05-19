@@ -4186,47 +4186,4 @@ function dataCollectionRoleAssignmentsSub {
     return $returnObject
 }
 $funcDataCollectionRoleAssignmentsSub = $function:dataCollectionRoleAssignmentsSub.ToString()
-
-function dataCollectionClassicAdministratorsSub {
-    [CmdletBinding()]Param(
-        [string]$scopeId,
-        [string]$scopeDisplayName,
-        [string]$subscriptionMgPath,
-        $subscriptionQuotaId
-    )
-
-    $apiEndPoint = $azAPICallConf['azAPIEndpointUrls'].ARM
-    $api = "/subscriptions/$($scopeId)/providers/Microsoft.Authorization/classicAdministrators"
-    $apiVersion = '?api-version=2015-07-01'
-    $uri = $apiEndPoint + $api + $apiVersion
-    $azAPICallPayload = @{
-        uri                    = $uri
-        method                 = 'GET'
-        currentTask            = "classicAdministrators '$($scopeDisplayName)' ('$scopeId') [quotaId:'$subscriptionQuotaId']"
-        AzAPICallConfiguration = $azAPICallConf
-    }
-
-    $AzApiCallResult = AzAPICall @azAPICallPayload
-    if ($AzApiCallResult -ne 'ClassicAdministratorListFailed') {
-        $arrayClassicAdministrators = [System.Collections.ArrayList]@()
-        foreach ($roleAll in $AzApiCallResult) {
-            $splitPropertiesRole = $roleAll.properties.role.Split(';')
-            foreach ($role in $splitPropertiesRole) {
-                $null = $arrayClassicAdministrators.Add([PSCustomObject]@{
-                        Subscription       = $scopeDisplayName
-                        SubscriptionId     = $scopeId
-                        SubscriptionMgPath = $subscriptionMgPath
-                        Identity           = $roleAll.properties.emailAddress
-                        Role               = $role
-                        Id                 = $roleAll.id
-                    })
-            }
-        }
-        $script:htClassicAdministrators.($scopeId) = @{
-            ClassicAdministrators = $arrayClassicAdministrators
-        }
-    }
-}
-$funcDataCollectionClassicAdministratorsSub = $function:dataCollectionClassicAdministratorsSub.ToString()
-
 #endregion functions4DataCollection

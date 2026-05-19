@@ -406,7 +406,7 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.7.2',
+    $ProductVersion = '6.7.3',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -6984,7 +6984,6 @@ function processDataCollection {
             $htSubscriptionsRoleAssignmentLimit = $using:htSubscriptionsRoleAssignmentLimit
             $arrayPsRule = $using:arrayPsRule
             $arrayPSRuleTracking = $using:arrayPSRuleTracking
-            $htClassicAdministrators = $using:htClassicAdministrators
             $htRoleAssignmentsPIM = $using:htRoleAssignmentsPIM
             $alzPolicies = $using:alzPolicies
             $alzPolicySets = $using:alzPolicySets
@@ -7026,7 +7025,6 @@ function processDataCollection {
             $function:dataCollectionPolicyAssignmentsSub = $using:funcDataCollectionPolicyAssignmentsSub
             $function:dataCollectionRoleDefinitions = $using:funcDataCollectionRoleDefinitions
             $function:dataCollectionRoleAssignmentsSub = $using:funcDataCollectionRoleAssignmentsSub
-            $function:dataCollectionClassicAdministratorsSub = $using:funcDataCollectionClassicAdministratorsSub
             $function:dataCollectionDefenderEmailContacts = $using:funcDataCollectionDefenderEmailContacts
             $function:dataCollectionVNets = $using:funcDataCollectionVNets
             $function:dataCollectionPrivateEndpoints = $using:funcDataCollectionPrivateEndpoints
@@ -7210,9 +7208,6 @@ function processDataCollection {
                         if ($functionReturn.'addRowToTableDone') {
                             $addRowToTableDone = $true
                         }
-
-                        #SubscriptionClassicAdministrators
-                        dataCollectionClassicAdministratorsSub @baseParameters -SubscriptionMgPath $childMgMgPath
                     }
 
                     if ($addRowToTableDone -ne $true) {
@@ -13736,94 +13731,6 @@ extensions: [{ name: 'sort' }]
 '@)
     #endregion ScopeInsightsBlueprintsScoped
 
-    if ($mgOrSub -eq 'sub') {
-        #region ScopeInsightsClassicAdministrators
-        if ($htClassicAdministrators.($subscriptionId).ClassicAdministrators.Count -gt 0) {
-            $tfCount = $htClassicAdministrators.($subscriptionId).ClassicAdministrators.Count
-            $htmlTableId = "ScopeInsights_ClassicAdministrators_$($subscriptionId -replace '\(','_' -replace '\)','_' -replace '-','_' -replace '\.','_')"
-            $randomFunctionName = "func_$htmlTableId"
-            [void]$htmlScopeInsights.AppendLine(@"
-<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible"><i class="fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">$tfCount Classic Administrators</span></button>
-<div class="content $SIDivContentClass">
-&nbsp;&nbsp;<i class="fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
-<table id="$htmlTableId" class="$cssClass">
-<thead>
-<tr>
-<th>Role</th>
-<th>Identity</th>
-</tr>
-</thead>
-<tbody>
-"@)
-            $htmlScopeInsightsClassicAdministrators = $null
-            $htmlScopeInsightsClassicAdministrators = foreach ($classicAdministrator in $htClassicAdministrators.($subscriptionId).ClassicAdministrators | Sort-Object -Property Role, Identity) {
-                @"
-<tr>
-<td>$($classicAdministrator.Role)</td>
-<td>$($classicAdministrator.Identity)</td>
-</tr>
-"@
-            }
-            [void]$htmlScopeInsights.AppendLine($htmlScopeInsightsClassicAdministrators)
-            [void]$htmlScopeInsights.AppendLine(@"
-                </tbody>
-            </table>
-        </div>
-        <script>
-            function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
-                window.helpertfConfig4$htmlTableId =1;
-                var tfConfig4$htmlTableId = {
-                base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
-"@)
-            if ($tfCount -gt 10) {
-                $spectrum = "10, $tfCount"
-                if ($tfCount -gt 50) {
-                    $spectrum = "10, 25, 50, $tfCount"
-                }
-                if ($tfCount -gt 100) {
-                    $spectrum = "10, 30, 50, 100, $tfCount"
-                }
-                if ($tfCount -gt 500) {
-                    $spectrum = "10, 30, 50, 100, 250, $tfCount"
-                }
-                if ($tfCount -gt 1000) {
-                    $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
-                }
-                if ($tfCount -gt 2000) {
-                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
-                }
-                if ($tfCount -gt 3000) {
-                    $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
-                }
-                [void]$htmlScopeInsights.AppendLine(@"
-paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
-"@)
-            }
-            [void]$htmlScopeInsights.AppendLine(@"
-                btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
-                col_types: [
-                    'caseinsensitivestring',
-                    'caseinsensitivestring'
-                ],
-                extensions: [{ name: 'sort' }]
-            };
-            var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
-            tf.init();}}
-        </script>
-"@)
-        }
-        else {
-            [void]$htmlScopeInsights.AppendLine(@'
-                    <i class="fa fa-ban" aria-hidden="true"></i> No Classic Administrators
-'@)
-        }
-        [void]$htmlScopeInsights.AppendLine(@'
-</td></tr>
-<tr><td class="detailstd">
-'@)
-        #endregion ScopeInsightsClassicAdministrators
-    }
-
     #RoleAssignments
     #region ScopeInsightsRoleAssignments
     if ($mgOrSub -eq 'mg') {
@@ -19711,106 +19618,6 @@ extensions: [{ name: 'sort' }]
 "@)
     }
     #endregion SUMMARYOrphanedRoleAssignments
-
-    #region SUMMARYClassicAdministrators
-    Write-Host '  processing TenantSummary ClassicAdministrators'
-
-    if ($htClassicAdministrators.Keys.Count -gt 0) {
-        $tfCount = $htClassicAdministrators.Values.ClassicAdministrators.Count
-        $htmlTableId = 'TenantSummary_ClassicAdministrators'
-        [void]$htmlTenantSummary.AppendLine(@"
-<button onclick="loadtf$("func_$htmlTableId")()" type="button" class="collapsible" id="buttonTenantSummary_ClassicAdministrators"><i class="padlx fa fa-check-circle blue" aria-hidden="true"></i> <span class="valignMiddle">$($tfCount) Classic Administrators</span>
-</button>
-<div class="content TenantSummary">
-<i class="padlxx fa fa-table" aria-hidden="true"></i> Download CSV <a class="externallink" href="#" onclick="download_table_as_csv_semicolon('$htmlTableId');">semicolon</a> | <a class="externallink" href="#" onclick="download_table_as_csv_comma('$htmlTableId');">comma</a>
-<table id= "$htmlTableId" class="summaryTable">
-<thead>
-<tr>
-<th>Subscription</th>
-<th>SubscriptionId</th>
-<th>MgPath</th>
-<th>Role</th>
-<th>Identity</th>
-</tr>
-</thead>
-<tbody>
-"@)
-        $htmlSUMMARYClassicAdministrators = $null
-        $classicAdministrators = $htClassicAdministrators.Values.ClassicAdministrators | Sort-Object -Property Subscription, Role, Identity
-        if (-not $NoCsvExport) {
-            $csvFilename = "$($filename)_ClassicAdministrators"
-            Write-Host "   Exporting ClassicAdministrators CSV '$($outputPath)$($DirectorySeparatorChar)$($csvFilename).csv'"
-            $classicAdministrators | Select-Object -ExcludeProperty Id | Sort-Object -Property Subscription, SubscriptionId, Role | Export-Csv -Encoding utf8 -Path "$($outputPath)$($DirectorySeparatorChar)$($csvFilename).csv" -Delimiter $csvDelimiter -NoTypeInformation
-        }
-        $htmlSUMMARYClassicAdministrators = foreach ($classicAdministrator in $classicAdministrators) {
-            @"
-<tr>
-<td>$($classicAdministrator.Subscription)</td>
-<td>$($classicAdministrator.SubscriptionId)</td>
-<td>$($classicAdministrator.SubscriptionMgPath)</td>
-<td>$($classicAdministrator.Role)</td>
-<td>$($classicAdministrator.Identity)</td>
-</tr>
-"@
-        }
-        [void]$htmlTenantSummary.AppendLine($htmlSUMMARYClassicAdministrators)
-        [void]$htmlTenantSummary.AppendLine(@"
-            </tbody>
-        </table>
-    </div>
-    <script>
-        function loadtf$("func_$htmlTableId")() { if (window.helpertfConfig4$htmlTableId !== 1) {
-            window.helpertfConfig4$htmlTableId =1;
-            var tfConfig4$htmlTableId = {
-            base_path: 'https://www.azadvertizer.net/azgovvizv4/tablefilter/', rows_counter: true,
-"@)
-        if ($tfCount -gt 10) {
-            $spectrum = "10, $tfCount"
-            if ($tfCount -gt 50) {
-                $spectrum = "10, 25, 50, $tfCount"
-            }
-            if ($tfCount -gt 100) {
-                $spectrum = "10, 30, 50, 100, $tfCount"
-            }
-            if ($tfCount -gt 500) {
-                $spectrum = "10, 30, 50, 100, 250, $tfCount"
-            }
-            if ($tfCount -gt 1000) {
-                $spectrum = "10, 30, 50, 100, 250, 500, 750, $tfCount"
-            }
-            if ($tfCount -gt 2000) {
-                $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, $tfCount"
-            }
-            if ($tfCount -gt 3000) {
-                $spectrum = "10, 30, 50, 100, 250, 500, 750, 1000, 1500, 3000, $tfCount"
-            }
-            [void]$htmlTenantSummary.AppendLine(@"
-paging: {results_per_page: ['Records: ', [$spectrum]]},/*state: {types: ['local_storage'], filters: true, page_number: true, page_length: true, sort: true},*/
-"@)
-        }
-        [void]$htmlTenantSummary.AppendLine(@"
-btn_reset: true, highlight_keywords: true, alternate_rows: true, auto_filter: { delay: 1100 }, no_results_message: true,
-            col_3: 'select',
-            col_types: [
-                'caseinsensitivestring',
-                'caseinsensitivestring',
-                'caseinsensitivestring',
-                'caseinsensitivestring',
-                'caseinsensitivestring'
-            ],
-extensions: [{ name: 'sort' }]
-        };
-        var tf = new TableFilter('$htmlTableId', tfConfig4$htmlTableId);
-        tf.init();}}
-    </script>
-"@)
-    }
-    else {
-        [void]$htmlTenantSummary.AppendLine(@'
-            <p><i class="padlx fa fa-ban" aria-hidden="true"></i> No ClassicAdministrators</p>
-'@)
-    }
-    #endregion SUMMARYClassicAdministrators
 
     #region SUMMARYRoleAssignmentsAll
     $startRoleAssignmentsAll = Get-Date
@@ -35783,49 +35590,6 @@ function dataCollectionRoleAssignmentsSub {
     return $returnObject
 }
 $funcDataCollectionRoleAssignmentsSub = $function:dataCollectionRoleAssignmentsSub.ToString()
-
-function dataCollectionClassicAdministratorsSub {
-    [CmdletBinding()]Param(
-        [string]$scopeId,
-        [string]$scopeDisplayName,
-        [string]$subscriptionMgPath,
-        $subscriptionQuotaId
-    )
-
-    $apiEndPoint = $azAPICallConf['azAPIEndpointUrls'].ARM
-    $api = "/subscriptions/$($scopeId)/providers/Microsoft.Authorization/classicAdministrators"
-    $apiVersion = '?api-version=2015-07-01'
-    $uri = $apiEndPoint + $api + $apiVersion
-    $azAPICallPayload = @{
-        uri                    = $uri
-        method                 = 'GET'
-        currentTask            = "classicAdministrators '$($scopeDisplayName)' ('$scopeId') [quotaId:'$subscriptionQuotaId']"
-        AzAPICallConfiguration = $azAPICallConf
-    }
-
-    $AzApiCallResult = AzAPICall @azAPICallPayload
-    if ($AzApiCallResult -ne 'ClassicAdministratorListFailed') {
-        $arrayClassicAdministrators = [System.Collections.ArrayList]@()
-        foreach ($roleAll in $AzApiCallResult) {
-            $splitPropertiesRole = $roleAll.properties.role.Split(';')
-            foreach ($role in $splitPropertiesRole) {
-                $null = $arrayClassicAdministrators.Add([PSCustomObject]@{
-                        Subscription       = $scopeDisplayName
-                        SubscriptionId     = $scopeId
-                        SubscriptionMgPath = $subscriptionMgPath
-                        Identity           = $roleAll.properties.emailAddress
-                        Role               = $role
-                        Id                 = $roleAll.id
-                    })
-            }
-        }
-        $script:htClassicAdministrators.($scopeId) = @{
-            ClassicAdministrators = $arrayClassicAdministrators
-        }
-    }
-}
-$funcDataCollectionClassicAdministratorsSub = $function:dataCollectionClassicAdministratorsSub.ToString()
-
 #endregion functions4DataCollection
 #endregion Functions
 
@@ -36129,7 +35893,6 @@ if (-not $HierarchyMapOnly) {
     }
     $arrayPsRule = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPSRuleTracking = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayOrphanedResources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPIMEligible = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $alzPolicies = @{}

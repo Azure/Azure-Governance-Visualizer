@@ -406,7 +406,7 @@ Param
     $Product = 'AzGovViz',
 
     [string]
-    $ProductVersion = '6.7.2',
+    $ProductVersion = '6.7.3',
 
     [string]
     $GithubRepository = 'aka.ms/AzGovViz',
@@ -1103,7 +1103,6 @@ if (-not $HierarchyMapOnly) {
     }
     $arrayPsRule = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPSRuleTracking = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
-    $htClassicAdministrators = [System.Collections.Hashtable]::Synchronized(@{})
     $arrayOrphanedResources = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $arrayPIMEligible = [System.Collections.ArrayList]::Synchronized((New-Object System.Collections.ArrayList))
     $alzPolicies = @{}

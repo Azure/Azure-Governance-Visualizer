@@ -86,6 +86,10 @@ Azure Architecture Center (Landing zones): [Azure Governance Visualizer deployme
 
 ## Release history
 
+**Changes** (2026-May-18 / 6.7.3 Patch)
+
+- fix issue 294; retirement Classic Administrators
+
 **Changes** (2025-May-21 / 6.7.2 Patch)
 
 - use [AzAPICall](https://aka.ms/AzAPICall) PowerShell module version 1.4.1 (previous 1.4.0). Handle token refresh for OIDC in Azure Devops and GitHub Actions fix
@@ -195,7 +199,6 @@ Short presentation on Azure Governance Visualizer: [download](slides/AzGovViz_in
   - PIM (Privileged Identity Management) eligibility for role assignments
     - Get a full report of all PIM eligible role assignments for Management Groups and subscriptions, including resolved user members of Microsoft Entra ID groups that have assigned eligibility
     - &#x1F4A1; Note: this feature requires you to execute as service principal with `Application` API permission `PrivilegedAccess.Read.AzureResources`
-  - Role assignments ClassicAdministrators
   - Security & best practice analysis
     - Existence of custom role definition that reflect 'Owner' permissions
     - Report all role definitions that are capable to write role assignments, list all role assignments for those role definitions
@@ -778,7 +781,7 @@ git config --system core.longpaths true
 
 ## Facts
 
-Disabled Azure subscriptions and subscriptions where Quota ID starts with with "AAD\_" are being skipped, all others are queried. More information on Subscription Quota ID / Offer numbers: [Supported Microsoft Azure offers](https://learn.microsoft.com/azure/cost-management-billing/costs/understand-cost-mgt-data#supported-microsoft-azure-offers).
+Disabled Azure subscriptions and subscriptions where Quota ID starts with "AAD\_" are being skipped, all others are queried. More information on Subscription Quota ID / Offer numbers: [Supported Microsoft Azure offers](https://learn.microsoft.com/azure/cost-management-billing/costs/understand-cost-mgt-data#supported-microsoft-azure-offers).
 
 ARM Limits are not acquired programmatically, these are hardcoded. The links used to check related limits are commented in the param section of the script.
 
