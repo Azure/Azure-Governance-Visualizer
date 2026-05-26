@@ -232,9 +232,42 @@ function dataCollectionVNets {
     $currentTask = "Getting Virtual Networks for Subscription: '$($scopeDisplayName)' ('$scopeId') [quotaId:'$SubscriptionQuotaId']"
     $uri = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/subscriptions/$($scopeId)/providers/Microsoft.Network/virtualNetworks?api-version=2022-05-01"
     $method = 'GET'
-    $networkResult = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -currentTask $currentTask -caller 'CustomDataCollection'
 
-    if ($networkResult -eq 'someError') {
+    try {
+        $networkResult = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uri -method $method -currentTask $currentTask -caller 'CustomDataCollection' -unhandledErrorAction Continue
+    }
+    catch {
+        Write-Host "[dataCollectionVNets] Primary VNet collection failed for subscription '$scopeDisplayName' ('$scopeId'): $($_.Exception.Message)"
+        Write-Host "[dataCollectionVNets] Trying Resource Graph fallback for subscription '$scopeDisplayName' ('$scopeId')"
+
+        try {
+            $uriResourceGraph = "$($azAPICallConf['azAPIEndpointUrls'].ARM)/providers/Microsoft.ResourceGraph/resources?api-version=2022-10-01"
+            $resourceGraphQuery = @"
+resources
+| where type =~ 'microsoft.network/virtualnetworks'
+| where subscriptionId =~ '$scopeId'
+| project id, name, location, properties
+"@
+            $body = @"
+{
+    "query": "$resourceGraphQuery",
+    "subscriptions": ["$scopeId"],
+    "options": {
+        "`$top": 1000
+    }
+}
+"@
+
+            $networkResult = AzAPICall -AzAPICallConfiguration $azAPICallConf -uri $uriResourceGraph -method 'POST' -body $body -listenOn 'Content' -currentTask "$currentTask (ResourceGraph fallback)" -caller 'CustomDataCollection' -unhandledErrorAction Continue
+            Write-Host "[dataCollectionVNets] Resource Graph fallback succeeded for subscription '$scopeDisplayName' ('$scopeId') and returned $($networkResult.Count) Virtual Networks"
+        }
+        catch {
+            Write-Host "[dataCollectionVNets] Skipping VNet collection for subscription '$scopeDisplayName' ('$scopeId') due to fallback error: $($_.Exception.Message)"
+            $networkResult = 'convertfromJSONError'
+        }
+    }
+
+    if ($networkResult -eq 'someError' -or $networkResult -eq 'convertfromJSONError') {
     }
     else {
         if ($networkResult.Count -gt 0) {
