@@ -35801,11 +35801,21 @@ function dataCollectionClassicAdministratorsSub {
         method                 = 'GET'
         currentTask            = "classicAdministrators '$($scopeDisplayName)' ('$scopeId') [quotaId:'$subscriptionQuotaId']"
         AzAPICallConfiguration = $azAPICallConf
+        skipOnErrorCode        = 404
+        unhandledErrorAction   = 'Continue'
     }
 
     $AzApiCallResult = AzAPICall @azAPICallPayload
-    if ($AzApiCallResult -ne 'ClassicAdministratorListFailed') {
-        $arrayClassicAdministrators = [System.Collections.ArrayList]@()
+    $arrayClassicAdministrators = [System.Collections.ArrayList]@()
+
+    if (
+        $AzApiCallResult -eq 'InvalidResourceType' -or
+        $AzApiCallResult -eq 'someError' -or
+        $AzApiCallResult -eq 'ClassicAdministratorListFailed'
+    ) {
+        Write-Host "[dataCollectionClassicAdministratorsSub] classicAdministrators endpoint not supported or unavailable for subscription '$scopeDisplayName' ('$scopeId'); continuing with empty result"
+    }
+    else {
         foreach ($roleAll in $AzApiCallResult) {
             $splitPropertiesRole = $roleAll.properties.role.Split(';')
             foreach ($role in $splitPropertiesRole) {
@@ -35819,9 +35829,10 @@ function dataCollectionClassicAdministratorsSub {
                     })
             }
         }
-        $script:htClassicAdministrators.($scopeId) = @{
-            ClassicAdministrators = $arrayClassicAdministrators
-        }
+    }
+
+    $script:htClassicAdministrators.($scopeId) = @{
+        ClassicAdministrators = $arrayClassicAdministrators
     }
 }
 $funcDataCollectionClassicAdministratorsSub = $function:dataCollectionClassicAdministratorsSub.ToString()
