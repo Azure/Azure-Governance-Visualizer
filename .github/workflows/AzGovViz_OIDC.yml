@@ -36,10 +36,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Connect Azure OIDC
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{secrets.CLIENT_ID}} #create this secret
           tenant-id: ${{secrets.TENANT_ID}} #create this secret
@@ -47,14 +47,14 @@ jobs:
           enable-AzPSSession: true
 
       - name: Check prerequisites
-        uses: azure/powershell@1300bbd2b3e1c21c029fe34887d16d2809a1397f # v1.4.0
+        uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3.0.0
         with:
           inlineScript: |
             . .\$($env:ScriptDir)\$($env:ScriptPrereqFile) -OutputPath ${env:OutputPath}
           azPSVersion: "latest"
 
       - name: Run Azure Governance Visualizer
-        uses: azure/powershell@1300bbd2b3e1c21c029fe34887d16d2809a1397f # v1.4.0
+        uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3.0.0
         with:
           inlineScript: |
             . .\$($env:ScriptDir)\$($env:ScriptFile) -ManagementGroupId ${env:ManagementGroupId} -SubscriptionId4AzContext ${{secrets.SUBSCRIPTION_ID}} -ScriptPath ${env:ScriptDir} -OutputPath ${env:OutputPath} -GitHubActionsOIDC
@@ -72,7 +72,7 @@ jobs:
       #log again to avoid timeout before web publishing
       - name: Connect Azure OIDC
         if: env.WebAppPublish == 'true'
-        uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
         with:
           client-id: ${{secrets.CLIENT_ID}} #create this secret (GitHub/Setting/Secrets)
           tenant-id: ${{secrets.TENANT_ID}} #create this secret
@@ -81,7 +81,7 @@ jobs:
 
       - name: Publish HTML to WebApp
         if: env.WebAppPublish == 'true'
-        uses: azure/powershell@1300bbd2b3e1c21c029fe34887d16d2809a1397f # v1.4.0
+        uses: azure/powershell@f5b8adcfff1904872c7b98d4012d4914d74b1a82 # v3.0.0
         with:
           inlineScript: |
             $azAPICallConf = initAzAPICall -DebugAzAPICall $true
