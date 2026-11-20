@@ -301,6 +301,8 @@
             #Array&HTs
             $newTable = $using:newTable
             $storageAccounts = $using:storageAccounts
+            $arrayModelDeploymentAccounts = $using:arrayModelDeploymentAccounts
+            $arrayModelDeployments = $using:arrayModelDeployments
             $resourcesAll = $using:resourcesAll
             $resourcesIdsAll = $using:resourcesIdsAll
             $resourceGroupsAll = $using:resourceGroupsAll
@@ -350,7 +352,6 @@
             $htSubscriptionsRoleAssignmentLimit = $using:htSubscriptionsRoleAssignmentLimit
             $arrayPsRule = $using:arrayPsRule
             $arrayPSRuleTracking = $using:arrayPSRuleTracking
-            $htClassicAdministrators = $using:htClassicAdministrators
             $htRoleAssignmentsPIM = $using:htRoleAssignmentsPIM
             $alzPolicies = $using:alzPolicies
             $alzPolicySets = $using:alzPolicySets
@@ -376,6 +377,7 @@
             $function:dataCollectionDefenderPlans = $using:funcDataCollectionDefenderPlans
             $function:dataCollectionDiagnosticsSub = $using:funcDataCollectionDiagnosticsSub
             $function:dataCollectionResources = $using:funcDataCollectionResources
+            $function:dataCollectionModelDeployments = $using:funcDataCollectionModelDeployments
             $function:dataCollectionStorageAccounts = $using:funcDataCollectionStorageAccounts
             $function:dataCollectionResourceGroups = $using:funcDataCollectionResourceGroups
             $function:dataCollectionResourceProviders = $using:funcDataCollectionResourceProviders
@@ -392,7 +394,6 @@
             $function:dataCollectionPolicyAssignmentsSub = $using:funcDataCollectionPolicyAssignmentsSub
             $function:dataCollectionRoleDefinitions = $using:funcDataCollectionRoleDefinitions
             $function:dataCollectionRoleAssignmentsSub = $using:funcDataCollectionRoleAssignmentsSub
-            $function:dataCollectionClassicAdministratorsSub = $using:funcDataCollectionClassicAdministratorsSub
             $function:dataCollectionDefenderEmailContacts = $using:funcDataCollectionDefenderEmailContacts
             $function:dataCollectionVNets = $using:funcDataCollectionVNets
             $function:dataCollectionPrivateEndpoints = $using:funcDataCollectionPrivateEndpoints
@@ -482,6 +483,10 @@
                                 ChildMgParentNameChainDelimited = $childMgParentNameChainDelimited
                             }
                             DataCollectionStorageAccounts @baseParameters @dataCollectionStorageAccountsParameters
+                        }
+
+                        if (-not $azAPICallConf['htParameters'].NoFoundryModelDeployments) {
+                            DataCollectionModelDeployments @baseParameters -ChildMgMgPath $childMgMgPath
                         }
 
                         if ($azAPICallConf['htParameters'].NoResources -eq $false) {
@@ -576,9 +581,6 @@
                         if ($functionReturn.'addRowToTableDone') {
                             $addRowToTableDone = $true
                         }
-
-                        #SubscriptionClassicAdministrators
-                        dataCollectionClassicAdministratorsSub @baseParameters -SubscriptionMgPath $childMgMgPath
                     }
 
                     if ($addRowToTableDone -ne $true) {
@@ -648,6 +650,11 @@
     if ($azAPICallConf['htParameters'].NoResources -eq $false) {
 
         $script:resourcesAllGroupedBySubcriptionId = $resourcesAll | Group-Object -Property subscriptionId
+        #hashtable index (subscriptionId -> group members) for O(1) lookup in ScopeInsights instead of repeated .where() scans
+        $script:resourcesAllGroupedBySubcriptionIdHt = @{}
+        foreach ($grpEntry in $resourcesAllGroupedBySubcriptionId) {
+            $script:resourcesAllGroupedBySubcriptionIdHt[$grpEntry.Name] = $grpEntry.Group
+        }
 
         $totaldurationSubResourcesAddArray = ($arraySubResourcesAddArrayDuration.DurationSec | Measure-Object -Sum).Sum
         Write-Host "Collecting custom data total duration writing the subResourcesArray: $totaldurationSubResourcesAddArray seconds"
